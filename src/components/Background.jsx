@@ -110,7 +110,7 @@ const Background = () => {
     };
 
     // Draw animated glow circles
-    const drawGlows = () => {
+    const drawGlows = (scrollPercent) => {
       const glowPositions = [
         { x: canvas.width * 0.2, y: canvas.height * (0.1 + scrollPercent * 0.3), color: '#0ea5e9' },
         { x: canvas.width * 0.8, y: canvas.height * (0.6 + scrollPercent * 0.2), color: '#06b6d4' },
@@ -132,7 +132,7 @@ const Background = () => {
       const scrollPercent = scrollProgress / 100;
 
       drawGradientBg();
-      drawGlows();
+      drawGlows(scrollPercent);
 
       // Update and draw particles
       particles.forEach((particle) => {
