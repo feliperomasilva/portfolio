@@ -199,7 +199,7 @@ const Projects = () => {
               marginBottom: 'var(--space-md)',
             }}
           >
-            💻 Trabalhos em Destaque
+            Trabalhos em Destaque
           </motion.span>
 
           <motion.h2

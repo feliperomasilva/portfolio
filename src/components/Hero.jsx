@@ -168,7 +168,7 @@ const Hero = () => {
             letterSpacing: '0.1em',
             backdropFilter: 'blur(4px)',
           }}>
-            ✨ Bem-vindo ao meu portfólio
+            Bem-vindo ao meu portfólio
           </span>
         </motion.div>
 

@@ -60,7 +60,7 @@ const About = () => {
               marginBottom: 'var(--space-md)',
             }}
           >
-            👤 Sobre Mim
+            Sobre Mim
           </motion.span>
 
           <motion.h2

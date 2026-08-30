@@ -2,6 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useScrollDirection, useViewportSize } from '../hooks/useCustom';
 import { navItems } from '../data/content';
+import { Home, User, Zap, Briefcase, MessageCircle, Menu, X } from 'lucide-react';
+
+const iconMap = {
+  hero: Home,
+  about: User,
+  skills: Zap,
+  projects: Briefcase,
+  contact: MessageCircle
+};
 
 const Navbar = () => {
   const { scrollDirection, scrollY } = useScrollDirection();
@@ -50,14 +59,6 @@ const Navbar = () => {
     }
   };
 
-  const navIcons = {
-    hero: '🏠',
-    about: '👤',
-    skills: '⚡',
-    projects: '💻',
-    contact: '💬'
-  };
-
   return (
     <motion.nav
       style={{
@@ -77,6 +78,7 @@ const Navbar = () => {
     >
       <div style={{ maxWidth: '80rem', margin: '0 auto', padding: 'var(--space-md) var(--space-md)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          {/* Logo */}
           <motion.a
             href="#hero"
             style={{
@@ -87,65 +89,82 @@ const Navbar = () => {
               textDecoration: 'none',
               cursor: 'pointer',
               transition: 'color var(--transition-fast)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
             }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onMouseEnter={(e) => e.target.style.color = 'var(--color-accent-blue)'}
             onMouseLeave={(e) => e.target.style.color = 'white'}
           >
+            <Home size={24} style={{ color: 'var(--color-accent-blue)' }} />
             FRS
           </motion.a>
 
+          {/* Desktop Navigation */}
           {!isMobile && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              {navItems.map((item) => (
-                <motion.button
-                  key={item.id}
-                  onClick={() => handleNavClick(item.id)}
-                  style={{
-                    position: 'relative',
-                    padding: '0.5rem var(--space-sm)',
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    color: activeSection === item.id ? 'var(--color-accent-blue)' : 'var(--color-text-muted)',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'color var(--transition-fast)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                  }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onMouseEnter={(e) => {
-                    if (activeSection !== item.id) e.target.style.color = 'white';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (activeSection !== item.id) e.target.style.color = 'var(--color-text-muted)';
-                  }}
-                >
-                  <span>{navIcons[item.id]}</span>
-                  <span>{item.label}</span>
-                  {activeSection === item.id && (
-                    <motion.div
-                      layoutId="navbar-indicator"
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              {navItems.map((item) => {
+                const Icon = iconMap[item.id];
+                const isActive = activeSection === item.id;
+
+                return (
+                  <motion.button
+                    key={item.id}
+                    onClick={() => handleNavClick(item.id)}
+                    style={{
+                      position: 'relative',
+                      padding: '0.5rem var(--space-sm)',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      color: isActive ? 'var(--color-accent-blue)' : 'var(--color-text-muted)',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'color var(--transition-fast)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) e.target.style.color = 'white';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) e.target.style.color = 'var(--color-text-muted)';
+                    }}
+                  >
+                    <Icon
+                      size={18}
                       style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        height: '2px',
-                        background: 'linear-gradient(to right, transparent, var(--color-accent-blue), transparent)',
+                        color: isActive ? 'var(--color-accent-blue)' : 'currentColor',
+                        transition: 'color var(--transition-fast)',
                       }}
-                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                     />
-                  )}
-                </motion.button>
-              ))}
+                    <span>{item.label}</span>
+                    {isActive && (
+                      <motion.div
+                        layoutId="navbar-indicator"
+                        style={{
+                          position: 'absolute',
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          height: '2px',
+                          background: 'linear-gradient(to right, transparent, var(--color-accent-blue), transparent)',
+                        }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                      />
+                    )}
+                  </motion.button>
+                );
+              })}
             </div>
           )}
 
+          {/* Mobile Menu Button */}
           {isMobile && (
             <motion.button
               onClick={() => setIsOpen(!isOpen)}
@@ -166,11 +185,12 @@ const Navbar = () => {
               whileTap={{ scale: 0.95 }}
               aria-label="Toggle menu"
             >
-              {isOpen ? '✕' : '☰'}
+              {isOpen ? <X size={24} /> : <Menu size={24} />}
             </motion.button>
           )}
         </div>
 
+        {/* Mobile Navigation */}
         {isMobile && isOpen && (
           <motion.div
             style={{
@@ -186,32 +206,37 @@ const Navbar = () => {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
           >
-            {navItems.map((item) => (
-              <motion.button
-                key={item.id}
-                onClick={() => handleNavClick(item.id)}
-                style={{
-                  textAlign: 'left',
-                  padding: 'var(--space-sm)',
-                  borderRadius: '0.5rem',
-                  backgroundColor: activeSection === item.id ? 'rgba(14, 165, 233, 0.1)' : 'transparent',
-                  color: activeSection === item.id ? 'var(--color-accent-blue)' : 'var(--color-text-muted)',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all var(--transition-fast)',
-                  fontSize: '1rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  fontWeight: 500,
-                }}
-                whileHover={{ x: 8 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <span>{navIcons[item.id]}</span>
-                <span>{item.label}</span>
-              </motion.button>
-            ))}
+            {navItems.map((item) => {
+              const Icon = iconMap[item.id];
+              const isActive = activeSection === item.id;
+
+              return (
+                <motion.button
+                  key={item.id}
+                  onClick={() => handleNavClick(item.id)}
+                  style={{
+                    textAlign: 'left',
+                    padding: 'var(--space-sm)',
+                    borderRadius: '0.5rem',
+                    backgroundColor: isActive ? 'rgba(14, 165, 233, 0.1)' : 'transparent',
+                    color: isActive ? 'var(--color-accent-blue)' : 'var(--color-text-muted)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'all var(--transition-fast)',
+                    fontSize: '1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    fontWeight: 500,
+                  }}
+                  whileHover={{ x: 8 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Icon size={20} />
+                  <span>{item.label}</span>
+                </motion.button>
+              );
+            })}
           </motion.div>
         )}
       </div>
@@ -238,4 +263,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

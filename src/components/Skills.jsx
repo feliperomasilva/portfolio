@@ -147,7 +147,7 @@ const Skills = () => {
               marginBottom: 'var(--space-md)',
             }}
           >
-            ⚡ Expertise
+            Expertise
           </motion.span>
 
           <motion.h2

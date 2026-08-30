@@ -57,6 +57,18 @@ export const projectsContent = {
     {
       id: 1,
       number: "01",
+      name: "Agrotec",
+      category: "Plataforma Web",
+      description: "Plataforma completa de gestão agrícola com dashboard interativo, mapas geográficos e análise de dados em tempo real para otimização de cultivos",
+      image: "/assets/images/agrotec.jpg",
+      technologies: ["React", "TypeScript", "Leaflet", "Node.js"],
+      featured: true,
+      link: "https://github.com/feliperomasilva/projeto-agrotec",
+      github: "feliperomasilva/projeto-agrotec"
+    },
+    {
+      id: 2,
+      number: "02",
       name: "Aurora",
       category: "Experiência Interativa",
       description: "Uma experiência de marca premium com arte generativa, animações controladas por scroll e visuais imersivos",
@@ -66,8 +78,8 @@ export const projectsContent = {
       link: "#"
     },
     {
-      id: 2,
-      number: "02",
+      id: 3,
+      number: "03",
       name: "Flux",
       category: "Plataforma E-commerce",
       description: "E-commerce moderno com inventário em tempo real, transições suaves e otimizações de performance",
@@ -77,8 +89,8 @@ export const projectsContent = {
       link: "#"
     },
     {
-      id: 3,
-      number: "03",
+      id: 4,
+      number: "04",
       name: "Nebula",
       category: "Sistema de Design",
       description: "Sistema de design abrangente com 50+ componentes, recursos de acessibilidade e modo escuro",
@@ -88,8 +100,8 @@ export const projectsContent = {
       link: "#"
     },
     {
-      id: 4,
-      number: "04",
+      id: 5,
+      number: "05",
       name: "Quantum",
       category: "Dashboard de Análise",
       description: "Dashboard de análise em tempo real com visualizações dinâmicas e insights preditivos",
