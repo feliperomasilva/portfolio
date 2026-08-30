@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-08-30T09:49:21.092Z",
+        "reason": "intentional choice for professional body typography - Inter is used specifically for readability and clean aesthetics in this portfolio context"
+      }
+    ]
+  }
+}
