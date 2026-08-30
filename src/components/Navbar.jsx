@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { useScrollDirection, useViewportSize } from '../hooks/useCustom';
 import { navItems } from '../data/content';
 
@@ -49,24 +50,34 @@ const Navbar = () => {
     }
   };
 
+  const navIcons = {
+    hero: '🏠',
+    about: '👤',
+    skills: '⚡',
+    projects: '💻',
+    contact: '💬'
+  };
+
   return (
-    <nav
+    <motion.nav
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         zIndex: 40,
-        transform: isHidden ? 'translateY(-100%)' : 'translateY(0)',
-        transition: 'transform 0.3s',
         backdropFilter: hasScroll ? 'blur(8px)' : 'none',
         backgroundColor: hasScroll ? 'rgba(10, 20, 40, 0.5)' : 'transparent',
         borderBottom: hasScroll ? '1px solid rgba(14, 165, 233, 0.1)' : 'none',
+        transition: 'all var(--transition-smooth)',
       }}
+      initial={{ y: 0 }}
+      animate={{ y: isHidden ? '-100%' : 0 }}
+      transition={{ duration: 0.3 }}
     >
       <div style={{ maxWidth: '80rem', margin: '0 auto', padding: 'var(--space-md) var(--space-md)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <a
+          <motion.a
             href="#hero"
             style={{
               fontSize: '1.125rem',
@@ -77,16 +88,18 @@ const Navbar = () => {
               cursor: 'pointer',
               transition: 'color var(--transition-fast)',
             }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onMouseEnter={(e) => e.target.style.color = 'var(--color-accent-blue)'}
             onMouseLeave={(e) => e.target.style.color = 'white'}
           >
             FRS
-          </a>
+          </motion.a>
 
           {!isMobile && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
               {navItems.map((item) => (
-                <button
+                <motion.button
                   key={item.id}
                   onClick={() => handleNavClick(item.id)}
                   style={{
@@ -99,7 +112,12 @@ const Navbar = () => {
                     border: 'none',
                     cursor: 'pointer',
                     transition: 'color var(--transition-fast)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
                   }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onMouseEnter={(e) => {
                     if (activeSection !== item.id) e.target.style.color = 'white';
                   }}
@@ -107,26 +125,29 @@ const Navbar = () => {
                     if (activeSection !== item.id) e.target.style.color = 'var(--color-text-muted)';
                   }}
                 >
-                  {item.label}
+                  <span>{navIcons[item.id]}</span>
+                  <span>{item.label}</span>
                   {activeSection === item.id && (
-                    <div
+                    <motion.div
+                      layoutId="navbar-indicator"
                       style={{
                         position: 'absolute',
                         bottom: 0,
                         left: 0,
                         right: 0,
                         height: '2px',
-                        background: 'var(--color-accent-blue)',
+                        background: 'linear-gradient(to right, transparent, var(--color-accent-blue), transparent)',
                       }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                     />
                   )}
-                </button>
+                </motion.button>
               ))}
             </div>
           )}
 
           {isMobile && (
-            <button
+            <motion.button
               onClick={() => setIsOpen(!isOpen)}
               style={{
                 padding: '0.5rem',
@@ -135,25 +156,38 @@ const Navbar = () => {
                 border: 'none',
                 cursor: 'pointer',
                 fontSize: '1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '40px',
+                height: '40px',
               }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               aria-label="Toggle menu"
             >
               {isOpen ? '✕' : '☰'}
-            </button>
+            </motion.button>
           )}
         </div>
 
         {isMobile && isOpen && (
-          <div style={{
-            marginTop: '1rem',
-            paddingTop: '1rem',
-            borderTop: '1px solid rgba(14, 165, 233, 0.1)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.5rem',
-          }}>
+          <motion.div
+            style={{
+              marginTop: '1rem',
+              paddingTop: '1rem',
+              borderTop: '1px solid rgba(14, 165, 233, 0.1)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
+            }}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
             {navItems.map((item) => (
-              <button
+              <motion.button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
                 style={{
@@ -166,16 +200,42 @@ const Navbar = () => {
                   cursor: 'pointer',
                   transition: 'all var(--transition-fast)',
                   fontSize: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  fontWeight: 500,
                 }}
+                whileHover={{ x: 8 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {item.label}
-              </button>
+                <span>{navIcons[item.id]}</span>
+                <span>{item.label}</span>
+              </motion.button>
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
-    </nav>
+
+      {/* Animated bottom bar */}
+      <motion.div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '2px',
+          background: 'linear-gradient(90deg, transparent, var(--color-accent-blue), transparent)',
+          opacity: hasScroll ? 1 : 0,
+        }}
+        animate={{
+          opacity: hasScroll ? 1 : 0,
+          scaleX: hasScroll ? 1 : 0,
+        }}
+        transition={{ duration: 0.3 }}
+      />
+    </motion.nav>
   );
 };
 
 export default Navbar;
+

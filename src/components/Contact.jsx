@@ -24,7 +24,7 @@ const Contact = () => {
       y: 0,
       transition: {
         duration: 0.8,
-        ease: [0.34, 1.56, 0.64, 1],
+        ease: [0.25, 0.46, 0.45, 0.94],
       },
     },
   };
@@ -170,6 +170,7 @@ const Contact = () => {
                 e.currentTarget.style.color = 'var(--color-accent-blue)';
               }}
             >
+              <span>{link.icon === 'github' && '🐙'}{link.icon === 'linkedin' && '💼'}{link.icon === 'twitter' && '𝕏'}{link.icon === 'dribbble' && '🎨'}</span>
               <span>{link.label}</span>
               <motion.span
                 initial={{ x: 0 }}
@@ -191,7 +192,7 @@ const Contact = () => {
             fontFamily: 'var(--font-mono)',
           }}
         >
-          Designed and built with care in 2024
+          © 2024 Felipe Roma Silva. Todos os direitos reservados.
         </motion.p>
 
         <motion.div
@@ -260,3 +261,4 @@ const Contact = () => {
 };
 
 export default Contact;
+

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useInView } from '../hooks/useCustom';
 import { skillsContent } from '../data/content';
 
-const SkillCard = ({ category, skills, index }) => {
+const SkillCard = ({ category, skills, icon, index }) => {
   const [isHovered, setIsHovered] = React.useState(false);
 
   return (
@@ -18,7 +18,7 @@ const SkillCard = ({ category, skills, index }) => {
       transition={{
         duration: 0.6,
         delay: index * 0.1,
-        ease: [0.34, 1.56, 0.64, 1],
+        ease: [0.25, 0.46, 0.45, 0.94],
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -47,7 +47,11 @@ const SkillCard = ({ category, skills, index }) => {
             marginBottom: 'var(--space-md)',
             transform: isHovered ? 'translateX(8px)' : 'translateX(0)',
             transition: 'transform var(--transition-fast)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
           }}>
+            <span style={{ fontSize: '1.5rem' }}>{icon}</span>
             {category}
           </h3>
 
@@ -107,7 +111,7 @@ const Skills = () => {
       y: 0,
       transition: {
         duration: 0.8,
-        ease: [0.34, 1.56, 0.64, 1],
+        ease: [0.25, 0.46, 0.45, 0.94],
       },
     },
   };
@@ -143,7 +147,7 @@ const Skills = () => {
               marginBottom: 'var(--space-md)',
             }}
           >
-            Expertise
+            ⚡ Expertise
           </motion.span>
 
           <motion.h2
@@ -190,6 +194,7 @@ const Skills = () => {
               key={category.name}
               category={category.name}
               skills={category.skills}
+              icon={category.icon}
               index={index}
             />
           ))}
@@ -214,3 +219,4 @@ const Skills = () => {
 };
 
 export default Skills;
+

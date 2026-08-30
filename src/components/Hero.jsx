@@ -1,13 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from '../hooks/useCustom';
 
 const ScrollIndicator = () => {
-  const { ref, isInView } = useInView();
-
   return (
     <motion.div
-      ref={ref}
       style={{
         position: 'absolute',
         bottom: '2rem',
@@ -15,7 +12,7 @@ const ScrollIndicator = () => {
         transform: 'translateX(-50%)',
       }}
       initial={{ opacity: 0 }}
-      animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ duration: 0.8, delay: 0.4 }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
@@ -26,7 +23,7 @@ const ScrollIndicator = () => {
           textTransform: 'uppercase',
           letterSpacing: '0.1em',
         }}>
-          Scroll to explore
+          Role para explorar
         </span>
         <motion.div
           animate={{ y: [0, 32, 0] }}
@@ -43,7 +40,7 @@ const ScrollIndicator = () => {
 };
 
 const Hero = () => {
-  const { ref: heroRef, isInView } = useInView();
+  const { ref: heroRef, isInView } = useInView({ threshold: 0.3 });
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -51,7 +48,7 @@ const Hero = () => {
       opacity: 1,
       transition: {
         staggerChildren: 0.15,
-        delayChildren: 0.3,
+        delayChildren: 0.2,
       },
     },
   };
@@ -63,7 +60,7 @@ const Hero = () => {
       y: 0,
       transition: {
         duration: 0.8,
-        ease: [0.34, 1.56, 0.64, 1],
+        ease: [0.25, 0.46, 0.45, 0.94],
       },
     },
   };
@@ -75,7 +72,7 @@ const Hero = () => {
       clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
       transition: {
         duration: 1,
-        ease: [0.34, 1.56, 0.64, 1],
+        ease: [0.25, 0.46, 0.45, 0.94],
       },
     },
   };
@@ -171,7 +168,7 @@ const Hero = () => {
             letterSpacing: '0.1em',
             backdropFilter: 'blur(4px)',
           }}>
-            Welcome to my portfolio
+            ✨ Bem-vindo ao meu portfólio
           </span>
         </motion.div>
 
@@ -195,7 +192,7 @@ const Hero = () => {
             maxWidth: '48rem',
             margin: '0 auto',
           }}>
-            Creative Developer crafting premium digital experiences
+            Desenvolvedor Criativo que constrói experiências digitais premium
           </h2>
         </motion.div>
 
@@ -211,8 +208,8 @@ const Hero = () => {
             lineHeight: '1.6',
           }}
         >
-          Specializing in frontend architecture, motion design, and user experience.
-          Every project is an opportunity to blend technical excellence with artistic vision.
+          Especializado em arquitetura frontend, motion design e experiência do usuário.
+          Cada projeto é uma oportunidade de combinar excelência técnica com visão artística.
         </motion.p>
 
         {/* CTA */}
@@ -253,7 +250,7 @@ const Hero = () => {
               e.target.style.transform = 'scale(1)';
             }}
           >
-            Explore My Work
+            🚀 Explorar Trabalhos
           </button>
 
           <a
@@ -282,7 +279,7 @@ const Hero = () => {
               e.target.style.backgroundColor = 'transparent';
             }}
           >
-            Get in Touch
+            💬 Entrar em Contato
           </a>
         </motion.div>
 

@@ -17,7 +17,7 @@ const ProjectCard = ({ project, index }) => {
       transition={{
         duration: 0.7,
         delay: index * 0.15,
-        ease: [0.34, 1.56, 0.64, 1],
+        ease: [0.25, 0.46, 0.45, 0.94],
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -61,7 +61,7 @@ const ProjectCard = ({ project, index }) => {
                 cursor: 'pointer',
               }}
             >
-              View Project
+              Ver Projeto
             </a>
           </div>
         </div>
@@ -163,7 +163,7 @@ const Projects = () => {
       y: 0,
       transition: {
         duration: 0.8,
-        ease: [0.34, 1.56, 0.64, 1],
+        ease: [0.25, 0.46, 0.45, 0.94],
       },
     },
   };
@@ -199,7 +199,7 @@ const Projects = () => {
               marginBottom: 'var(--space-md)',
             }}
           >
-            Featured Work
+            💻 Trabalhos em Destaque
           </motion.span>
 
           <motion.h2
@@ -264,3 +264,4 @@ const Projects = () => {
 };
 
 export default Projects;
+
