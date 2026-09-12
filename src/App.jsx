@@ -56,10 +56,10 @@ function App() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs sm:text-sm text-slate-500 font-mono">
-              © 2024 Felipe Roma Silva. All rights reserved.
+              © 2024 Felipe Romao da Silva. All rights reserved.
             </p>
             <p className="text-xs sm:text-sm text-slate-500 font-mono">
-              Built with React, Framer Motion & Three.js
+              Construído com React, CSS & HTML
             </p>
           </div>
         </div>

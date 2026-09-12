@@ -45,14 +45,3 @@ src/
 ├── App.jsx
 └── main.jsx
 ```
-
-
-## 📄 Licença
-
-Este projeto é de uso pessoal. Sinta-se livre para customizar!
-
----
-
-**Desenvolvido com ❤️ e atenção aos detalhes**
-
-Última atualização: 2024
