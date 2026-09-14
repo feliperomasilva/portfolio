@@ -1,0 +1,26 @@
+/* Grade de 4 cartões de habilidade (vira 2 colunas no tablet, 1 no celular) */
+.skills-title { margin: 1.4rem 0 0.8rem; max-width: 16ch; }
+.skills-sub { margin-bottom: 2.4rem; max-width: 60ch; }
+.skills-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.skill-card { padding: 1.5rem 1.3rem; height: 100%; }
+.skill-card h3 { margin: 1rem 0 1.1rem; font-size: 1.2rem; }
+.skill-top { display: flex; justify-content: space-between; align-items: center; }
+/* Ícone em quadrado com degradê; gira no hover do cartão */
+.skill-icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; color: #f2f7ff; background: linear-gradient(135deg, var(--amber), var(--amber-deep)); transition: transform 0.35s var(--ease-out); }
+.skill-card:hover .skill-icon { transform: rotate(-10deg) scale(1.1); }
+/* Lista de tecnologias com bolinha marcadora */
+.skill-card ul { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; }
+.skill-card li { display: flex; align-items: center; gap: 0.7rem; font-size: 0.92rem; color: var(--ink-dim); font-weight: 500; transition: color 0.25s, transform 0.25s var(--ease-out); }
+.skill-card li:hover { color: var(--ink); transform: translateX(4px); }
+.skill-card .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); flex-shrink: 0; }
+@media (max-width: 1020px) { .skills-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) {
+  .skills-grid { grid-template-columns: 1fr; }
+  .skill-card { padding: 1.25rem 1.1rem; }
+  .skill-card li { font-size: 0.95rem; padding: 0.15rem 0; }
+}
+/* Sem mouse não há hover: desliga os movimentos */
+@media (hover: none) {
+  .skill-card:hover .skill-icon { transform: none; }
+  .skill-card li:hover { transform: none; }
+}

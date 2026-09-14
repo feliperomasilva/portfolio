@@ -1,0 +1,73 @@
+/* Hero: tela cheia com vídeo ao fundo (z 0), véu (z 1) e conteúdo por cima (z 2).
+   Desktop: cartão à esquerda (0.82fr) + texto à direita (1.18fr). Mobile: texto primeiro, cartão depois. */
+.cy-hero { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; padding-top: calc(var(--nav-h) + 2rem); padding-bottom: 4rem; overflow: hidden; }
+/* Véu extra sobre o vídeo (além do .showreel-veil) para fundir topo/base com o fundo da página */
+.cy-matrix { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.cy-fade { position: absolute; inset: 0; background: radial-gradient(ellipse 90% 75% at 50% 40%, transparent 30%, var(--bg-0) 88%), linear-gradient(180deg, rgba(5,10,20,0.55), transparent 30%, transparent 65%, var(--bg-0) 98%); }
+.cy-grid { position: relative; z-index: 2; display: grid; grid-template-columns: 0.82fr 1.18fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+.cy-copy { order: 2; max-width: 640px; justify-self: end; width: 100%; }
+.cy-card { order: 1; }
+.cy-copy .cy-title { text-wrap: balance; letter-spacing: -0.035em; }
+/* Rótulo superior com ponto pulsante */
+.cy-eyebrow { display: inline-flex; align-items: center; gap: 0.6rem; margin-bottom: 1.2rem; color: var(--ice); }
+.cy-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--matrix); animation: pulse-dot 2s ease-in-out infinite; }
+/* Título gigante; cada linha é uma máscara para as palavras subirem de dentro */
+.cy-title { margin-bottom: 1.1rem; font-size: clamp(3rem, 6.5vw, 5.6rem); }
+.cy-mask { display: block; overflow: hidden; padding-bottom: 0.08em; }
+/* Fatiamento por palavra: .w-word recorta, .w-inner é o que o GSAP move */
+.split-words { display: inline; }
+.w-word { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: 0.08em; margin-bottom: -0.08em; margin-right: 0.24em; }
+.w-word:last-child { margin-right: 0; }
+.w-inner { display: inline-block; will-change: transform, opacity; }
+.cy-accent { color: var(--amber); }
+.cy-sub { font-size: clamp(1rem, 1.7vw, 1.15rem); max-width: 50ch; margin-bottom: 1.7rem; }
+.cy-sub strong { color: var(--ink); }
+.cy-ctas { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; margin-bottom: 1.7rem; }
+.cy-ctas .btn { display: inline-flex; align-items: center; gap: 0.55rem; }
+/* Provas rápidas (3 itens com número em destaque) */
+.cy-proof { list-style: none; display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; padding: 0; margin: 0; }
+.cy-proof li { display: flex; align-items: baseline; gap: 0.5rem; font-size: 0.82rem; color: var(--ink-dim); }
+.cy-proof strong { color: var(--amber); }
+.anim-icon { vertical-align: -3px; }
+/* Cartão carrossel */
+.cy-card { padding: 1.1rem; display: flex; flex-direction: column; gap: 0.8rem; min-height: 420px; }
+.cy-card-top { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--ink-mute); }
+.cy-live { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--matrix); font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; }
+.cy-live i { width: 7px; height: 7px; border-radius: 50%; background: var(--matrix); animation: pulse-dot 1.6s ease-in-out infinite; }
+/* Janela dos slides: altura fixa de 2 linhas (2x148px), arrasto vertical, cursor de "agarra" */
+.cy-list { position: relative; height: 296px; overflow: hidden; border-radius: 12px; border: 1px solid var(--line-soft); background: rgba(5,10,20,0.5); perspective: 1200px; touch-action: pan-y; cursor: grab; }
+.cy-list:active { cursor: grabbing; }
+.cy-list-inner { position: absolute; left: 0; right: 0; top: 50%; height: 0; transform-style: preserve-3d; }
+/* Cada slide é posicionado via JS (translateY + escala); o ativo ganha borda/fundo de destaque */
+.cy-track { position: absolute; left: 0.7rem; right: 0.7rem; top: -74px; height: 148px; display: flex; flex-direction: column; justify-content: center; gap: 0.25rem; padding: 0.9rem 1rem; border-radius: 12px; border: 1px solid transparent; background: transparent; color: var(--ink); text-align: left; font-family: inherit; cursor: pointer; will-change: transform, opacity; transition: border-color 0.25s, background 0.25s; }
+.cy-track strong { font-family: var(--font-display); font-size: 1.25rem; letter-spacing: -0.02em; }
+.cy-desc { font-size: 0.82rem; color: var(--ink-dim); }
+.cy-track.active { border-color: rgba(46,124,246,0.3); background: rgba(46,124,246,0.05); }
+/* Controles: anterior / play-pause / próximo + botão de ação do slide ativo (empurrado à direita) */
+.cy-controls { display: flex; align-items: center; gap: 0.5rem; }
+.cy-controls button { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border-radius: 10px; border: 1px solid var(--line-soft); background: rgba(238,244,255,0.04); color: var(--ink); cursor: pointer; transition: border-color 0.25s, color 0.25s, transform 0.25s var(--ease-out); }
+.cy-controls button:hover { border-color: var(--amber); color: var(--amber); transform: translateY(-1px); }
+.cy-controls .cy-play { border-color: rgba(46,124,246,0.35); color: var(--amber); }
+.cy-open { margin-left: auto; padding: 0 1.1rem; font-size: 0.85rem; font-weight: 700; background: var(--amber) !important; color: #f2f7ff !important; border-color: transparent !important; }
+.cy-open:hover { background: #4a90ff !important; color: #fff !important; }
+/* Tablet/mobile: empilha (texto antes do cartão), botões viram largura total */
+@media (max-width: 960px) {
+  .cy-grid { grid-template-columns: 1fr; gap: 1.8rem; }
+  .cy-copy { order: 1; justify-self: start; max-width: 100%; }
+  .cy-card { order: 2; }
+  .cy-hero { min-height: auto; padding-bottom: 2rem; }
+  .cy-card { min-height: 400px; }
+  .cy-ctas .magnetic { flex: 1 1 100%; display: flex; }
+  .cy-ctas .magnetic .btn { flex: 1 1 auto; width: 100%; justify-content: center; }
+}
+@media (max-width: 560px) {
+  .cy-title { font-size: clamp(2.4rem, 11vw, 3.1rem); }
+  .cy-proof { gap: 0.4rem 1rem; }
+  .cy-card { padding: 0.9rem; }
+  .cy-track strong { font-size: 1.1rem; }
+}
+/* Acessibilidade: sem movimento, tudo visível e parado */
+@media (prefers-reduced-motion: reduce) {
+  .cy-eyebrow, .cy-sub, .cy-ctas, .cy-proof, .cy-card, .w-word, .w-inner { opacity: 1 !important; transform: none !important; }
+  .cy-pulse, .cy-live i { animation: none; }
+}

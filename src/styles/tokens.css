@@ -1,0 +1,48 @@
+/* Fonte única de verdade do visual: cores, fontes, espaçamentos, raios, sombras e altura da navbar.
+   Trocar um valor aqui reflete no site inteiro. */
+:root {
+  /* Fundos (azul-noite, do mais escuro ao mais claro) */
+  --bg-0: #050a14;
+  --bg-1: #080f1e;
+  --bg-2: #0b1528;
+  --bg-3: #12203a;
+  /* Textos (branco principal, cinza-azulados de apoio) */
+  --ink: #eef4ff;
+  --ink-dim: #b9c6de;
+  --ink-mute: #8494b3;
+  /* Cor de destaque (azul) + variação escura para degradês */
+  --amber: #2e7cf6;
+  --amber-deep: #1a56c4;
+  /* Cores de apoio: ciano gelo (detalhes) e verde matrix (status "ao vivo") */
+  --ice: #7dd3fc;
+  --matrix: #22ff88;
+  /* Linhas e divisórias translúcidas */
+  --line: rgba(125, 211, 252, 0.09);
+  --line-soft: rgba(125, 211, 252, 0.05);
+  /* Fundo base dos cartões */
+  --card: #0a1322;
+  /* Cantos arredondados (pequeno, médio, grande) */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  /* Escala de espaçamento */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4.5rem;
+  --space-3xl: 7rem;
+  /* Famílias de fonte: display (títulos), body (texto), mono (rótulos/números) */
+  --font-display: 'Sora', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  /* Curva de easing padrão (saída suave, sem quiques) */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Sombras dos cartões (repouso e elevado no hover) */
+  --shadow-card: 10px 14px 44px rgba(0, 0, 0, 0.55);
+  --shadow-lift: 14px 22px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(46, 124, 246, 0.1);
+  /* Altura da navbar fixa (usada no padding das seções e na rolagem por âncora) */
+  --nav-h: 68px;
+  color-scheme: dark;
+}

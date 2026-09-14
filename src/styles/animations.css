@@ -1,160 +1,41 @@
-/* Animation Library */
+/* Animações de entrada (keyframes) + classes utilitárias de reveal usadas com IntersectionObserver */
 
-/* Text Reveal */
-@keyframes textReveal {
-  0% {
-    opacity: 0;
-    clip-path: polygon(0 0, 0 0, 0 100%, 0% 100%);
-  }
-  100% {
-    opacity: 1;
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-  }
+/* Sobe 34px enquanto aparece */
+@keyframes rise-in { from { opacity: 0; transform: translateY(34px); } to { opacity: 1; transform: translateY(0); } }
+/* Aparece desfocado e foca durante a subida */
+@keyframes blur-in { from { opacity: 0; filter: blur(14px); transform: translateY(18px); } to { opacity: 1; filter: blur(0); transform: translateY(0); } }
+/* Cresce de 94% enquanto sobe */
+@keyframes scale-in { from { opacity: 0; transform: scale(0.94) translateY(16px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+/* Revela como uma cortina abrindo de cima para baixo */
+@keyframes clip-in { from { opacity: 0; clip-path: inset(0 0 100% 0); transform: translateY(24px); } to { opacity: 1; clip-path: inset(0 0 0% 0); transform: translateY(0); } }
+/* Loop infinito de letreiro (desloca metade e recomeça de forma contínua) */
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+/* Giro contínuo lento */
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+/* Ponto "ao vivo": pulsa apagando e acendendo */
+@keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.8); } }
+/* Flutuação vertical suave */
+@keyframes float-y { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+
+/* Estado inicial escondido; a classe .in (adicionada via JS) dispara a animação */
+.rv { opacity: 0; }
+.rv.in { animation: rise-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.rv-blur.in { animation: blur-in 1s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.rv-scale.in { animation: scale-in 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.rv-clip.in { animation: clip-in 1s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+/* Atrasos escalonados para efeito cascata */
+.d1 { animation-delay: 0.08s; } .d2 { animation-delay: 0.16s; } .d3 { animation-delay: 0.26s; }
+.d4 { animation-delay: 0.38s; } .d5 { animation-delay: 0.5s; } .d6 { animation-delay: 0.62s; }
+
+/* Letreiro infinito */
+.marquee { overflow: hidden; white-space: nowrap; }
+.marquee-track { display: inline-flex; gap: 3rem; padding-right: 3rem; animation: marquee 28s linear infinite; will-change: transform; }
+/* Bolinha de status "ao vivo" */
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); animation: pulse-dot 2s ease-in-out infinite; }
+
+/* Acessibilidade: sem movimento, tudo aparece direto e o letreiro para */
+@media (prefers-reduced-motion: reduce) {
+  .rv, .rv-blur, .rv-scale, .rv-clip { opacity: 1; }
+  .rv.in, .rv-blur.in, .rv-scale.in, .rv-clip.in { animation: none; }
+  .marquee-track { animation: none; }
 }
-
-.animate-text-reveal {
-  animation: textReveal 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-/* Blur Reveal */
-@keyframes blurReveal {
-  0% {
-    opacity: 0;
-    filter: blur(10px);
-  }
-  100% {
-    opacity: 1;
-    filter: blur(0px);
-  }
-}
-
-.animate-blur-reveal {
-  animation: blurReveal 0.8s ease-out forwards;
-}
-
-/* Scale Fade In */
-@keyframes scaleFadeIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.animate-scale-fade-in {
-  animation: scaleFadeIn 0.6s ease-out forwards;
-}
-
-/* Slide Up */
-@keyframes slideUp {
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-slide-up {
-  animation: slideUp 0.6s ease-out forwards;
-}
-
-/* Glow Pulse */
-@keyframes glowPulse {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(14, 165, 233, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(14, 165, 233, 0.8);
-  }
-}
-
-.animate-glow-pulse {
-  animation: glowPulse 2s ease-in-out infinite;
-}
-
-/* Float */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-/* Stagger Children */
-.stagger-children > * {
-  animation: slideUp 0.6s ease-out forwards;
-}
-
-.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
-.stagger-children > *:nth-child(2) { animation-delay: 100ms; }
-.stagger-children > *:nth-child(3) { animation-delay: 200ms; }
-.stagger-children > *:nth-child(4) { animation-delay: 300ms; }
-.stagger-children > *:nth-child(5) { animation-delay: 400ms; }
-.stagger-children > *:nth-child(6) { animation-delay: 500ms; }
-.stagger-children > *:nth-child(7) { animation-delay: 600ms; }
-.stagger-children > *:nth-child(8) { animation-delay: 700ms; }
-
-/* Line Reveal */
-@keyframes lineReveal {
-  0% {
-    width: 0;
-  }
-  100% {
-    width: 100%;
-  }
-}
-
-.animate-line-reveal {
-  animation: lineReveal 1s ease-out forwards;
-}
-
-/* Underline Hover - uses transform instead of width for performance */
-.hover-underline {
-  position: relative;
-  overflow: hidden;
-}
-
-.hover-underline::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: var(--color-accent-blue);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.3s ease-out;
-}
-
-.hover-underline:hover::after {
-  transform: scaleX(1);
-}
-
-/* Entrance Animations */
-.entrance-fade-in {
-  opacity: 0;
-  animation: fadeIn 0.8s ease-out forwards;
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-

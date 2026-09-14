@@ -1,0 +1,47 @@
+/* Navbar fixa: transparente no topo, com blur ao rolar (.scrolled) e auto-hide descendo (.hidden) */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 70; padding-top: env(safe-area-inset-top, 0px); transition: transform 0.35s var(--ease-out), background 0.3s, border-color 0.3s; border-bottom: 1px solid transparent; }
+.nav.scrolled { background: rgba(5, 10, 20, 0.82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom-color: var(--line-soft); }
+.nav.hidden { transform: translateY(-100%); }
+.nav-inner { height: var(--nav-h); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+/* Marca: monograma F em degradê (gira no hover) + nome */
+.brand { display: flex; align-items: center; gap: 0.7rem; background: none; border: none; color: var(--ink); cursor: pointer; min-height: 44px; }
+.brand-mark { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; color: #f2f7ff; background: linear-gradient(135deg, var(--amber), var(--amber-deep)); transition: transform 0.3s var(--ease-out); }
+.brand:hover .brand-mark { transform: rotate(-8deg) scale(1.06); }
+.brand-text { font-weight: 600; font-size: 0.9rem; letter-spacing: 0.01em; }
+.brand-text em { font-style: normal; font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink-mute); margin-left: 0.4rem; }
+/* Pílula de links desktop */
+.nav-v2 { display: flex; gap: 0.15rem; align-items: center; background: rgba(238,244,255,0.04); border: 1px solid var(--line-soft); border-radius: 999px; padding: 0.3rem; }
+.nav-v2 button { display: inline-flex; align-items: center; gap: 0.45rem; background: none; border: none; color: var(--ink-mute); font-size: 0.87rem; font-weight: 600; padding: 0.6rem 0.9rem; border-radius: 999px; cursor: pointer; position: relative; min-height: 44px; transition: color 0.25s, background 0.25s, transform 0.25s var(--ease-out); }
+.nav-v2 button:hover { color: var(--ink); background: rgba(46,124,246,0.12); transform: translateY(-1px); }
+.nav-v2 button.active { color: var(--amber); background: rgba(46,124,246,0.14); }
+/* Ícone do link (JS anima escala/rotação via GSAP); box fixo de 20px para não deslocar o texto */
+.nav-ico { display: inline-flex; width: 20px; height: 20px; align-items: center; justify-content: center; flex-shrink: 0; opacity: 0; transform: scale(0) rotate(24deg) translateX(-6px); }
+.nav-ico svg, .nav-ico .anim-icon { width: 19px !important; height: 19px !important; }
+.nav-cta .btn svg, .nav-cta .btn .anim-icon { width: 18px !important; height: 18px !important; }
+.mobile-panel button svg, .mobile-panel button .anim-icon { width: 20px !important; height: 20px !important; }
+/* Barrinha sob o link ativo (scaleX animado pelo JS) */
+.nav-bar { position: absolute; left: 0.9rem; right: 0.9rem; bottom: 0.35rem; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--amber), var(--ice)); transform: scaleX(0); transform-origin: left center; }
+/* Brilho que varre o botão no hover (usado no "Vamos construir" e no "Iniciar um projeto agora") */
+.shine { overflow: hidden; }
+.shine::before { content: ''; position: absolute; top: 0; left: -80%; width: 60%; height: 100%; background: linear-gradient(105deg, transparent, rgba(255,255,255,0.5), transparent); transform: skewX(-20deg); transition: left 0.6s var(--ease-out); }
+.shine:hover::before { left: 130%; }
+.nav-cta { display: flex; align-items: center; gap: 1rem; }
+.nav-cta .btn { display: inline-flex; align-items: center; gap: 0.5rem; }
+.nav-btn { padding: 0.6rem 1.2rem; font-size: 0.85rem; }
+/* Hambúrguer e painel mobile (escondidos no desktop) */
+.menu-btn { display: none; background: rgba(238,244,255,0.06); border: 1px solid var(--line-soft); color: var(--ink); border-radius: 10px; width: 44px; height: 44px; place-items: center; cursor: pointer; }
+.mobile-panel { display: none; }
+/* Mobile: esconde links/CTA desktop, mostra hambúrguer; painel abre por max-height (sem blur, mais barato) */
+@media (max-width: 900px) {
+  .nav-inner { gap: 0.6rem; }
+  .brand-text { display: none; }
+  .nav-links, .nav-v2, .nav-cta { display: none; }
+  .menu-btn { display: grid; }
+  .nav.scrolled { background: rgba(5, 10, 20, 0.94); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .mobile-panel { display: flex; flex-direction: column; gap: 0.4rem; padding: 1rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px)); background: #050a14; border-bottom: 1px solid var(--line-soft); max-height: 0; overflow: hidden; padding-top: 0; padding-bottom: 0; transition: max-height 0.4s var(--ease-out), padding 0.3s; }
+  .mobile-panel.open { max-height: 560px; padding-top: 1rem; padding-bottom: 1.5rem; }
+  .mobile-panel button { text-align: left; background: none; border: none; color: var(--ink-dim); font-size: 1.15rem; font-weight: 600; font-family: var(--font-display); padding: 0.7rem 0.4rem; border-bottom: 1px solid var(--line-soft); cursor: pointer; display: flex; gap: 1rem; align-items: center; min-height: 48px; }
+  .mobile-panel button .mono { font-size: 0.72rem; color: var(--amber); }
+  .mobile-panel button.active { color: var(--amber); }
+  .mobile-panel .btn { margin-top: 1rem; justify-content: center; }
+}

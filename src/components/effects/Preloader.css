@@ -1,0 +1,61 @@
+/* Intro minimalista-editorial: fundo osso + documento branco com raio crisp e borda fina.
+   A serifada Instrument Serif dá o contraste editorial; o resto segue Geist/Sora/Inter do site. */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+
+/* Palco: osso quente, respira no mobile com safe-area */
+.preloader.intro { position: fixed; inset: 0; z-index: 200; background: #F7F6F3; display: grid; place-items: center; padding: 1.5rem calc(1.5rem + env(safe-area-inset-right, 0px)) calc(1.5rem + env(safe-area-inset-bottom, 0px)) calc(1.5rem + env(safe-area-inset-left, 0px)); overflow: hidden; }
+/* Mancha radial ambiente: deriva 24s quase invisível, fixa e sem interceptar clique */
+.intro-ambient { position: absolute; width: 60vmax; height: 60vmax; border-radius: 50%; background: radial-gradient(circle, rgba(31,108,159,0.05), transparent 65%); animation: intro-drift 24s ease-in-out infinite alternate; pointer-events: none; }
+@keyframes intro-drift { from { transform: translate(-12%, -8%) scale(1); } to { transform: translate(10%, 12%) scale(1.15); } }
+/* O documento: branco, borda 1px, sombra ultra-difusa quase zero */
+.intro-card { position: relative; width: min(560px, 100%); background: #FFFFFF; border: 1px solid #EAEAEA; border-radius: 12px; box-shadow: 0 2px 24px rgba(0,0,0,0.04); padding: 0 2.5rem 2rem; will-change: transform, opacity; }
+/* Barra de janela: pontos cinza + título central + ano à direita */
+.intro-chrome { display: flex; align-items: center; gap: 0.45rem; padding: 1rem 0; }
+.intro-dot { width: 10px; height: 10px; border-radius: 50%; background: #EAEAEA; flex-shrink: 0; }
+.intro-chrome-title { margin-left: 0.6rem; font-size: 0.68rem; letter-spacing: 0.1em; color: #787774; }
+.intro-chrome-year { margin-left: auto; font-size: 0.68rem; color: #787774; }
+/* Filete que desenha da esquerda (scaleX animado pelo GSAP) */
+.intro-rule-top { display: block; height: 1px; background: #EAEAEA; transform-origin: left center; margin: 0 -2.5rem; }
+/* Metadados em 3 colunas mono minúsculas */
+.intro-meta { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: 1.4rem 0 0; }
+.intro-meta span { font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: #787774; }
+/* Serifada gigante: apertada, alta e equilibrada nas quebras */
+.intro-serif { font-family: 'Instrument Serif', 'Newsreader', Georgia, serif; font-weight: 400; font-size: clamp(3.4rem, 12vw, 5.5rem); line-height: 1.05; letter-spacing: -0.03em; color: #111111; margin: 1.2rem 0 1rem; text-wrap: balance; }
+.intro-mask { display: block; overflow: hidden; padding-bottom: 0.06em; }
+.intro-mask > span { display: block; will-change: transform; }
+/* Itálico editorial na segunda linha */
+.intro-serif em { font-style: italic; }
+/* Subtítulo contido, nunca preto puro */
+.intro-sub { font-family: 'Inter', 'Helvetica Neue', system-ui, sans-serif; font-size: 0.98rem; line-height: 1.6; color: #2F3437; max-width: 42ch; margin: 0 0 1.5rem; }
+/* Pills em pastel com número mono ao lado; cascata de 80ms via GSAP */
+.intro-words { list-style: none; display: flex; gap: 0.7rem; flex-wrap: wrap; padding: 0; margin: 0 0 1.8rem; }
+.intro-word { display: inline-flex; align-items: center; gap: 0.5rem; will-change: transform, opacity; }
+.intro-num { font-size: 0.64rem; color: #787774; }
+.intro-pill { display: inline-flex; align-items: center; padding: 0.32rem 0.85rem; border-radius: 9999px; font-family: 'Inter', 'Helvetica Neue', system-ui, sans-serif; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+/* Pastéis lavados: fundo quase neutro, texto semântico escuro */
+.tone-blue { background: #E1F3FE; color: #1F6C9F; }
+.tone-yellow { background: #FBF3DB; color: #956400; }
+.tone-green { background: #EDF3EC; color: #346538; }
+/* Rodapé: contador, trilha de progresso e botão pular */
+.intro-foot { display: flex; align-items: center; gap: 1rem; border-top: 1px solid #EAEAEA; padding-top: 1.2rem; }
+.intro-count { font-size: 0.78rem; letter-spacing: 0.18em; color: #111111; font-variant-numeric: tabular-nums; }
+.intro-progress { position: relative; flex: 1; height: 2px; background: #EAEAEA; border-radius: 2px; overflow: hidden; }
+.intro-progress span { position: absolute; inset: 0; background: #111111; transform: scaleX(0); transform-origin: left center; }
+/* Pular: kbd físico + texto; hover escurece, active encolhe */
+.intro-skip { display: inline-flex; align-items: center; gap: 0.5rem; background: none; border: none; font-family: 'Inter', 'Helvetica Neue', system-ui, sans-serif; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #787774; cursor: pointer; min-height: 44px; padding: 0.4rem 0.2rem; transition: color 0.2s; }
+.intro-skip:hover { color: #111111; }
+.intro-skip:active { transform: scale(0.98); }
+.intro-skip kbd { font-family: 'JetBrains Mono', 'SF Mono', monospace; font-size: 0.64rem; border: 1px solid #EAEAEA; border-radius: 4px; background: #F7F6F3; padding: 0.2rem 0.45rem; color: #111111; }
+/* Mobile: documento mais justo, serifada menor */
+@media (max-width: 560px) {
+  .preloader.intro { padding: 1rem; }
+  .intro-card { padding: 0 1.5rem 1.5rem; border-radius: 8px; }
+  .intro-rule-top { margin: 0 -1.5rem; }
+  .intro-serif { font-size: clamp(2.8rem, 15vw, 3.6rem); }
+  .intro-sub { font-size: 0.92rem; }
+}
+/* Acessibilidade: sem movimento, tudo visível e parado */
+@media (prefers-reduced-motion: reduce) {
+  .intro-ambient { animation: none; }
+  .intro-card, .intro-rule-top, .intro-meta > *, .intro-serif > span, .intro-sub, .intro-word, .intro-foot { opacity: 1 !important; transform: none !important; }
+}

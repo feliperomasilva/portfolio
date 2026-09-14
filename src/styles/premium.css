@@ -1,0 +1,40 @@
+/* Estilos "premium" compartilhados: botão flutuante, rodapé e cabeçalhos de seção (a intro vive em Preloader.css) */
+
+/* Wrapper do efeito magnético (o JS move esse elemento) */
+.magnetic { display: inline-flex; }
+@media (hover: hover) and (pointer: fine) { .magnetic { will-change: transform; } }
+/* Altura mínima para o Reveal medir a posição mesmo antes do conteúdo aparecer */
+.rv-g { min-height: 1px; }
+/* Botão grande "Iniciar um projeto agora" */
+.contact-big-cta { margin-top: 1.4rem; text-decoration: none; }
+/* Cabeçalho de seção: número + rótulo em cima, título e subtítulo embaixo */
+.sec-head-premium { margin-bottom: clamp(2rem, 5vw, 3.5rem); }
+.sec-head-premium.center { text-align: center; }
+.sec-head-premium.center .sec-index-premium { justify-content: center; }
+.sec-index-premium { display: flex; align-items: center; gap: 0.9rem; margin-bottom: 1.2rem; }
+.sec-index-premium .num { font-size: 0.78rem; color: var(--amber); border: 1px solid rgba(46,124,246,0.35); padding: 0.3rem 0.65rem; border-radius: 999px; letter-spacing: 0.12em; }
+/* Linha decorativa que cresce da esquerda (animada pelo ScrollFX) */
+.line-grow { height: 1px; width: 56px; background: rgba(46,124,246,0.4); transform-origin: left center; }
+.sec-title-premium { max-width: 18ch; }
+.sec-title-premium .accent { color: var(--amber); }
+.sec-sub-premium { margin-top: 0.9rem; max-width: 62ch; }
+/* Botão flutuante "Fale comigo": invisível até rolar ~90% da primeira tela */
+.float-cta { position: fixed; right: 1.2rem; bottom: calc(1.2rem + env(safe-area-inset-bottom, 0px)); z-index: 75; display: inline-flex; align-items: center; gap: 0.6rem; background: var(--amber); color: #f2f7ff; font-weight: 700; font-size: 0.9rem; padding: 0.85rem 1.3rem; border-radius: 999px; border: none; cursor: pointer; box-shadow: 0 10px 28px rgba(46,124,246,0.2); opacity: 0; transform: translateY(24px); pointer-events: none; transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out), background 0.3s; }
+.float-cta.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.float-cta:hover { background: #3a86f7; transform: translateY(-2px); }
+/* Rodapé com blur e grade decorativa ao fundo */
+.footer-premium { position: relative; z-index: 1; border-top: 1px solid var(--line-soft); padding: 3rem 0 calc(1.6rem + env(safe-area-inset-bottom, 0px)); background: rgba(5,10,20,0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); overflow: hidden; }
+/* No celular desliga o blur (economiza bateria/GPU) */
+@media (max-width: 768px) { .footer-premium { backdrop-filter: none; -webkit-backdrop-filter: none; background: #050a14; } }
+.footer-matrix { background: linear-gradient(180deg, rgba(5,10,20,0.5), rgba(5,10,20,0.94)), radial-gradient(60% 120% at 15% 100%, rgba(46,124,246,0.08), transparent 60%), #050a14; }
+/* Grade de fundo que some nas bordas (máscara radial) */
+.footer-grid { position: absolute; inset: 0; pointer-events: none; opacity: 0.25; background-image: linear-gradient(rgba(125,211,252,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(125,211,252,0.06) 1px, transparent 1px); background-size: 44px 44px; mask-image: radial-gradient(ellipse 80% 100% at 50% 100%, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse 80% 100% at 50% 100%, black 30%, transparent 75%); }
+.footer-content { position: relative; }
+.footer-brand { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.8rem, 5vw, 3rem); letter-spacing: -0.03em; margin-bottom: 0.4rem; }
+.footer-brand span { color: var(--ink-mute); font-weight: 500; font-size: 0.55em; letter-spacing: 0.02em; }
+.footer-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 1.6rem; }
+.footer-row p { font-size: 0.75rem; }
+.top-btn { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(238,244,255,0.06); border: 1px solid var(--line-soft); color: var(--ink); border-radius: 999px; padding: 0.6rem 1.1rem; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: border-color 0.3s, color 0.3s, transform 0.3s var(--ease-out); }
+.top-btn:hover { border-color: var(--amber); color: var(--amber); transform: translateY(-2px); }
+@media (max-width: 640px) { .float-cta { right: 1rem; bottom: 1rem; padding: 0.8rem 1.1rem; } }
+@media (prefers-reduced-motion: reduce) { .float-cta { transition: none; } }

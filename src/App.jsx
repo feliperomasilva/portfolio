@@ -1,69 +1,77 @@
-import React, { useEffect } from 'react';
-import Background from './components/Background';
-import Cursor from './components/Cursor';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import About from './components/About';
-import Skills from './components/Skills';
-import Projects from './components/Projects';
-import Contact from './components/Contact';
-import ScrollProgress from './components/ScrollProgress';
+import { useEffect, useState } from 'react';
+import { ArrowUp, MessageCircle } from 'lucide-react';
+// Camadas globais: fundo animado, tela de loading e parallax por scroll
+import Background from './components/effects/Background';
+import Preloader from './components/effects/Preloader';
+import ScrollFX from './components/effects/ScrollFX';
+// Estrutura da página: navbar + seções (Hero com showreel, Sobre, Habilidades, Projetos, Contato)
+import Navbar from './components/layout/Navbar';
+import CyberHero from './components/sections/CyberHero';
+import About from './components/sections/About';
+import Skills from './components/sections/Skills';
+import Projects from './components/sections/Projects';
+import Contact from './components/sections/Contact';
+import { scrollToId } from './lib/js/dom';
+import { onScrollRaf } from './lib/js/perf';
+import { prefersReducedMotion } from './lib/js/device';
 import './styles/globals.css';
 import './styles/animations.css';
-import './styles/theme.css';
+import './styles/premium.css';
+import './App.css';
+
+// Botão flutuante "Fale comigo": aparece depois de rolar 90% da primeira tela e leva ao contato
+const FloatCTA = () => {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    // Listener de scroll otimizado (1x por frame) que liga/desliga o botão
+    const check = (y) => setShow(y > window.innerHeight * 0.9);
+    check(window.scrollY);
+    return onScrollRaf(check);
+  }, []);
+  return (
+    <button className={`float-cta ${show ? 'show' : ''}`} onClick={() => scrollToId('contact')} aria-label="Falar comigo sobre um projeto">
+      <MessageCircle size={17} /> Fale comigo
+    </button>
+  );
+};
 
 function App() {
   useEffect(() => {
-    // Prevent scroll on load and smooth behavior
-    document.documentElement.style.scrollBehavior = 'smooth';
-
-    // Check for prefers-reduced-motion
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) {
-      document.documentElement.style.scrollBehavior = 'auto';
-    }
-
-    return () => {
-      document.documentElement.style.scrollBehavior = 'auto';
-    };
+    // Rolagem suave global; desliga se o usuário preferir movimento reduzido
+    document.documentElement.style.scrollBehavior = prefersReducedMotion() ? 'auto' : 'smooth';
+    return () => { document.documentElement.style.scrollBehavior = 'auto'; };
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      {/* Background system */}
+    <div className="app">
+      {/* Link invisível para teclado/leitores de tela pularem direto ao conteúdo */}
+      <a className="skip-link" href="#showreel">Pular para o conteúdo</a>
+      <Preloader />
       <Background />
-
-      {/* Custom cursor */}
-      <Cursor />
-
-      {/* Navigation */}
+      <ScrollFX />
       <Navbar />
-
-      {/* Scroll progress indicator */}
-      <ScrollProgress />
-
-      {/* Main content */}
-      <main className="relative z-20">
-        <Hero />
+      {/* Ordem das seções na página */}
+      <main className="app-main">
+        <CyberHero />
         <About />
         <Skills />
         <Projects />
         <Contact />
       </main>
-
-      {/* Footer */}
-      <footer className="relative z-20 py-8 px-4 sm:px-6 lg:px-8 border-t border-azul-500/10 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs sm:text-sm text-slate-500 font-mono">
-              © 2024 Felipe Romao da Silva. All rights reserved.
-            </p>
-            <p className="text-xs sm:text-sm text-slate-500 font-mono">
-              Construído com React, CSS & HTML
-            </p>
+      {/* Rodapé: assinatura + botão de voltar ao topo */}
+      <footer className="footer-premium footer-matrix">
+        <span className="footer-grid" aria-hidden="true" />
+        <div className="wrap footer-content">
+          <p className="footer-brand">Felipe Romao <span>— portfólio ©2026</span></p>
+          <div className="footer-row">
+            <p className="mono">© 2026 Felipe Romao da Silva · React · GSAP · CSS — interfaces autorais.</p>
+            <button className="top-btn" onClick={() => scrollToId('showreel')} aria-label="Voltar ao topo">
+              Voltar ao topo <ArrowUp size={15} />
+            </button>
           </div>
         </div>
       </footer>
+      <FloatCTA />
     </div>
   );
 }
