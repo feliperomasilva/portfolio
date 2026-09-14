@@ -2,21 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import { canAnimate, ensureGsap } from '../../lib/js/motion';
 import './Preloader.css';
 
-// Palavras-âncora da intro: cada uma vira uma pill em pastel e ecoa uma frente do site
-// (Frontend → Skills/Projetos, Motion → Hero/ScrollFX, Detalhe → About). É assim que a intro
-// "conversa" com o resto: o vocabulário dela reaparece nas seções.
+// Frentes que ecoam as seções (Skills/Projetos/Hero)
 const WORDS = [
   { n: '01', label: 'Frontend', tone: 'tone-blue' },
-  { n: '02', label: 'Motion', tone: 'tone-yellow' },
-  { n: '03', label: 'Detalhe', tone: 'tone-green' },
+  { n: '02', label: 'Backend', tone: 'tone-green' },
+  { n: '03', label: 'Responsividade', tone: 'tone-ice' },
 ];
 
-// Intro minimalista-editorial: um documento branco sobre fundo osso que se apresenta em cascata
-// (cartão → filete → cabeçalho → serifada → pills → contador) e sai como cortina para cima,
-// disparando o evento 'frs:ready' que acorda a entrada do Hero. Aparece 1x por sessão.
-// ESC ou "Pular" acelera a timeline sem pular a coreografia de saída.
+// Intro dark minimalista no tema do site: vazio --bg-0 com glows amber/ice/matrix,
+// nome "Felipe Romão da Silva" desenhado em stroke SVG, contador 000→100 em ~5s,
+// saída em cortina que dispara 'frs:ready' para o Hero. 1x por sessão. ESC acelera.
 const Preloader = ({ onDone }) => {
-  // Se já viu nesta sessão, nem monta (o Hero toca direto)
   const [visible, setVisible] = useState(() => {
     if (typeof sessionStorage === 'undefined') return true;
     return !sessionStorage.getItem('frs-preloaded');
@@ -24,65 +20,72 @@ const Preloader = ({ onDone }) => {
   const rootRef = useRef(null);
   const numRef = useRef(null);
   const barRef = useRef(null);
+  const statusRef = useRef(null);
   const tlRef = useRef(null);
   const doneRef = useRef(false);
 
-  // Avança a timeline em 2.8x (usado pelo ESC e pelo botão Pular). Ignora se já está saindo.
   const skip = () => {
     const tl = tlRef.current;
     if (!tl || doneRef.current) return;
     if (tl.progress() > 0.82) return;
-    tl.timeScale(2.8);
+    tl.timeScale(3);
   };
 
   useEffect(() => {
     if (!visible) return;
-    // Trava a rolagem enquanto a intro está no ar
     document.body.style.overflow = 'hidden';
-    // Sem animação: finaliza direto
     if (!canAnimate()) {
       finish();
       return;
     }
     const gsap = ensureGsap();
+    const root = rootRef.current;
+    if (!root) {
+      finish();
+      return;
+    }
+    const q = (sel) => root.querySelectorAll(sel);
     const num = { v: 0 };
+    const setStatus = (t) => {
+      if (statusRef.current) statusRef.current.textContent = t;
+    };
     const tl = gsap.timeline({ onComplete: finish });
     tlRef.current = tl;
-    // Estado inicial de tudo que entra em cascata
-    tl.set('.intro-card', { opacity: 0, y: 24 }, 0);
-    tl.set('.intro-rule-top', { scaleX: 0 }, 0);
-    tl.set('.intro-meta > *', { opacity: 0, y: 8 }, 0);
-    tl.set('.intro-serif > span', { yPercent: 112 }, 0);
-    tl.set('.intro-sub', { opacity: 0, y: 12 }, 0);
-    tl.set('.intro-word', { opacity: 0, y: 12 }, 0);
-    tl.set('.intro-foot', { opacity: 0 }, 0);
-    // 1. O documento aparece
-    tl.to('.intro-card', { opacity: 1, y: 0, duration: 0.7, ease: 'expo.out' }, 0.05);
-    // 2. O filete superior desenha da esquerda para a direita
-    tl.to('.intro-rule-top', { scaleX: 1, duration: 0.8, ease: 'expo.inOut' }, 0.15);
-    // 3. Metadados do cabeçalho sobem em cascata
-    tl.to('.intro-meta > *', { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out', stagger: 0.08 }, 0.25);
-    // 4. A serifada gigante sobe de dentro das máscaras, linha por linha
-    tl.to('.intro-serif > span', { yPercent: 0, duration: 1.1, ease: 'expo.out', stagger: 0.12 }, 0.35);
-    // 5. Subtítulo + pills entram com o atraso em cascata (80ms entre itens)
-    tl.to('.intro-sub', { opacity: 1, y: 0, duration: 0.6, ease: 'expo.out' }, 0.9);
-    tl.to('.intro-word', { opacity: 1, y: 0, duration: 0.6, ease: 'expo.out', stagger: 0.08 }, 1.0);
-    // 6. Contador 000→100 e barra de progresso correm em paralelo com a cascata
+
+    tl.set(q('.boot-bg'), { opacity: 0 }, 0);
+    tl.set(q('.boot-meta > *'), { opacity: 0, y: 10 }, 0);
+    tl.set(q('.boot-draw .draw-line'), { strokeDashoffset: 1400, fillOpacity: 0 }, 0);
+    tl.set(q('.boot-rule'), { scaleX: 0 }, 0);
+    tl.set(q('.boot-sub'), { opacity: 0, y: 14 }, 0);
+    tl.set(q('.boot-word'), { opacity: 0, y: 14, scale: 0.96 }, 0);
+    tl.set(q('.boot-foot'), { opacity: 0, y: 10 }, 0);
+
+    tl.to(q('.boot-bg'), { opacity: 1, duration: 0.8, ease: 'expo.out' }, 0.05);
+    tl.to(q('.boot-meta > *'), { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out', stagger: 0.08 }, 0.2);
+    tl.to(q('.boot-draw .draw-line'), { strokeDashoffset: 0, duration: 2.6, ease: 'expo.inOut', stagger: 0.3 }, 0.3);
+    tl.to(q('.boot-draw .draw-main'), { fillOpacity: 1, duration: 0.9, ease: 'expo.out' }, 2.1);
+    tl.to(q('.boot-draw .draw-second'), { fillOpacity: 1, duration: 0.9, ease: 'expo.out' }, 2.6);
+    tl.to(q('.boot-rule'), { scaleX: 1, duration: 1.0, ease: 'expo.inOut' }, 1.4);
+    tl.to(q('.boot-sub'), { opacity: 1, y: 0, duration: 0.6, ease: 'expo.out' }, 2.4);
+    tl.to(q('.boot-word'), { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: 'expo.out', stagger: 0.09 }, 2.7);
+    tl.to(q('.boot-foot'), { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out' }, 2.9);
+
+    tl.call(() => setStatus('calibrando canvas…'), null, 0.5);
+    tl.call(() => setStatus('compondo hero…'), null, 2.0);
+    tl.call(() => setStatus('pronto — bem-vindo'), null, 3.8);
+
     tl.to(num, {
-      v: 100, duration: 1.6, ease: 'power2.inOut',
+      v: 100, duration: 3.6, ease: 'power2.inOut',
       onUpdate: () => {
         if (numRef.current) numRef.current.textContent = String(Math.round(num.v)).padStart(3, '0');
         if (barRef.current) barRef.current.style.transform = `scaleX(${(num.v / 100).toFixed(3)})`;
       },
     }, 0.4);
-    tl.to('.intro-foot', { opacity: 1, duration: 0.5, ease: 'expo.out' }, 1.1);
-    // 7. Respiro com tudo composto antes da saída
-    tl.to({}, { duration: 0.3 });
-    // 8. Saída: o conteúdo afunda suavemente e a página inteira sobe como cortina, revelando o Hero
-    tl.to('.intro-card', { y: -28, opacity: 0, duration: 0.5, ease: 'expo.in' }, '>-0.05');
-    tl.to(rootRef.current, { clipPath: 'inset(0 0 100% 0)', duration: 0.9, ease: 'expo.inOut' }, '<0.15');
 
-    // Marca a sessão, libera o scroll, acorda o Hero e desmonta
+    tl.to({}, { duration: 0.35 });
+    tl.to(q('.boot-card'), { y: -26, opacity: 0, duration: 0.45, ease: 'expo.in' }, '>-0.02');
+    tl.to(root, { clipPath: 'inset(0 0 100% 0)', duration: 0.75, ease: 'expo.inOut' }, '<0.12');
+
     function finish() {
       if (doneRef.current) return;
       doneRef.current = true;
@@ -92,7 +95,6 @@ const Preloader = ({ onDone }) => {
       setVisible(false);
       if (onDone) onDone();
     }
-    // ESC pula a intro (acelera, sem quebrar a saída)
     const onKey = (e) => { if (e.key === 'Escape') skip(); };
     window.addEventListener('keydown', onKey);
     return () => { window.removeEventListener('keydown', onKey); tl.kill(); document.body.style.overflow = ''; };
@@ -100,45 +102,38 @@ const Preloader = ({ onDone }) => {
 
   if (!visible) return null;
   return (
-    <div ref={rootRef} className="preloader intro" aria-label="Introdução" style={{ clipPath: 'inset(0 0 0% 0)' }}>
-      {/* Mancha radial lenta atrás do documento (20s+, quase invisível) */}
-      <span className="intro-ambient" aria-hidden="true" />
-      <div className="intro-card" role="dialog" aria-modal="true" aria-label="Apresentação do portfólio">
-        {/* Barra de janela minimalista: três pontos + título + ano */}
-        <div className="intro-chrome" aria-hidden="true">
-          <span className="intro-dot" />
-          <span className="intro-dot" />
-          <span className="intro-dot" />
-          <span className="intro-chrome-title mono">portfólio — vol. 03</span>
-          <span className="intro-chrome-year mono">©2026</span>
-        </div>
-        <span className="intro-rule-top" aria-hidden="true" />
-        {/* Metadados de abertura */}
-        <div className="intro-meta">
+    <div ref={rootRef} className="preloader intro-boot" aria-label="Introdução" style={{ clipPath: 'inset(0 0 0% 0)' }}>
+      <div className="boot-bg" aria-hidden="true">
+        <span className="boot-glow glow-a" />
+        <span className="boot-glow glow-b" />
+        <span className="boot-grid" />
+        <span className="boot-vignette" />
+      </div>
+      <div className="boot-card" role="dialog" aria-modal="true" aria-label="Apresentação do portfólio">
+        <div className="boot-meta">
           <span className="mono">introdução — 01</span>
           <span className="mono">brasil · remoto</span>
           <span className="mono">react · motion · ui</span>
         </div>
-        {/* Nome em serifada editorial, uma linha por máscara */}
-        <h1 className="intro-serif" aria-label="Felipe Romão">
-          <span className="intro-mask" aria-hidden="true"><span>Felipe</span></span>
-          <span className="intro-mask" aria-hidden="true"><span><em>Romão</em></span></span>
-        </h1>
-        <p className="intro-sub">Desenvolvedor criativo. Interfaces que parecem vivas, construídas com arquitetura frontend, motion design e obsessão por detalhe.</p>
-        {/* Três frentes em pills pastel que reaparecem como temas das seções */}
-        <ul className="intro-words" aria-label="Frentes de atuação">
+        <svg className="boot-draw" viewBox="0 0 680 196" role="img" aria-label="Felipe Romão da Silva">
+          <text x="50%" y="82" textAnchor="middle" className="draw-line draw-main">Felipe Romão</text>
+          <text x="50%" y="152" textAnchor="middle" className="draw-line draw-second">da Silva</text>
+        </svg>
+        <span className="boot-rule" aria-hidden="true" />
+        <p className="boot-sub">Interfaces que parecem vivas — arquitetura frontend, back-end nas sombras, detalhe em cada pixel.</p>
+        <ul className="boot-words" aria-label="Frentes de atuação">
           {WORDS.map((w) => (
-            <li key={w.n} className="intro-word">
-              <span className="intro-num mono">{w.n}</span>
-              <span className={`intro-pill ${w.tone}`}>{w.label}</span>
+            <li key={w.n} className="boot-word">
+              <span className="boot-num mono">{w.n}</span>
+              <span className={`boot-pill ${w.tone}`}>{w.label}</span>
             </li>
           ))}
         </ul>
-        {/* Rodapé: contador + progresso + saída */}
-        <div className="intro-foot">
-          <span className="intro-count mono" ref={numRef}>000</span>
-          <span className="intro-progress" aria-hidden="true"><span ref={barRef} /></span>
-          <button type="button" className="intro-skip" onClick={skip}>
+        <div className="boot-foot">
+          <span className="boot-count mono" ref={numRef}>000</span>
+          <span className="boot-progress" aria-hidden="true"><span ref={barRef} /></span>
+          <span className="boot-status mono" ref={statusRef}>calibrando canvas…</span>
+          <button type="button" className="boot-skip" onClick={skip} autoFocus>
             <kbd>ESC</kbd> pular
           </button>
         </div>
