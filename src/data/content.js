@@ -85,7 +85,7 @@ export const contactContent = {
   email: 'feliperomasilva@gmail.com',
   links: [
     { label: 'GitHub', url: 'https://github.com/feliperomasilva', icon: 'github' },
-    { label: 'LinkedIn', url: 'https://www.linkedin.com/in/feliperomasilva-dev', icon: 'linkedin' },
+    { label: 'LinkedIn', url: 'https://www.linkedin.com/in/feliperomao-dev', icon: 'linkedin' },
     { label: 'WhatsApp', url: 'https://wa.me/5514982019092?text=Ol%C3%A1%20Felipe%2C%20vi%20seu%20portf%C3%B3lio%20e%20quero%20conversar.', icon: 'whatsapp' },
   ],
 };
