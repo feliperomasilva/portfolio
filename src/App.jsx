@@ -11,6 +11,7 @@ import About from './components/sections/About';
 import Skills from './components/sections/Skills';
 import Projects from './components/sections/Projects';
 import Contact from './components/sections/Contact';
+import { LocaleProvider, useLocale } from './i18n/LocaleContext';
 import { scrollToId } from './lib/js/dom';
 import { onScrollRaf } from './lib/js/perf';
 import { prefersReducedMotion } from './lib/js/device';
@@ -21,6 +22,7 @@ import './App.css';
 
 // Botão flutuante "Fale comigo": aparece depois de rolar 90% da primeira tela e leva ao contato
 const FloatCTA = () => {
+  const { t } = useLocale();
   const [show, setShow] = useState(false);
   useEffect(() => {
     // Listener de scroll otimizado (1x por frame) que liga/desliga o botão
@@ -29,13 +31,14 @@ const FloatCTA = () => {
     return onScrollRaf(check);
   }, []);
   return (
-    <button className={`float-cta ${show ? 'show' : ''}`} onClick={() => scrollToId('contact')} aria-label="Falar comigo sobre um projeto">
-      <MessageCircle size={17} /> Fale comigo
+    <button className={`float-cta ${show ? 'show' : ''}`} onClick={() => scrollToId('contact')} aria-label={t.floatLabel}>
+      <MessageCircle size={17} /> {t.floatCta}
     </button>
   );
 };
 
-function App() {
+function AppInner() {
+  const { t } = useLocale();
   useEffect(() => {
     // Rolagem suave global; desliga se o usuário preferir movimento reduzido
     document.documentElement.style.scrollBehavior = prefersReducedMotion() ? 'auto' : 'smooth';
@@ -45,7 +48,7 @@ function App() {
   return (
     <div className="app">
       {/* Link invisível para teclado/leitores de tela pularem direto ao conteúdo */}
-      <a className="skip-link" href="#showreel">Pular para o conteúdo</a>
+      <a className="skip-link" href="#showreel">{t.skipLink}</a>
       <Preloader />
       <Background />
       <ScrollFX />
@@ -62,17 +65,25 @@ function App() {
       <footer className="footer-premium footer-matrix">
         <span className="footer-grid" aria-hidden="true" />
         <div className="wrap footer-content">
-          <p className="footer-brand">Felipe Romao <span>— portfólio ©2026</span></p>
+          <p className="footer-brand">Felipe Romao <span>{t.footerBrand}</span></p>
           <div className="footer-row">
-            <p className="mono">© 2026 Felipe Romao da Silva · React · GSAP · CSS — interfaces autorais.</p>
-            <button className="top-btn" onClick={() => scrollToId('showreel')} aria-label="Voltar ao topo">
-              Voltar ao topo <ArrowUp size={15} />
+            <p className="mono">{t.footerNote}</p>
+            <button className="top-btn" onClick={() => scrollToId('showreel')} aria-label={t.topBtn}>
+              {t.topBtn} <ArrowUp size={15} />
             </button>
           </div>
         </div>
       </footer>
       <FloatCTA />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <LocaleProvider>
+      <AppInner />
+    </LocaleProvider>
   );
 }
 

@@ -1,16 +1,26 @@
 /* Fundo de vídeo do Hero: fica atrás do texto (z-index 0) e cobre toda a seção */
 /* O .cy-grid do Hero tem z-index 2, por isso o conteúdo passa por cima do vídeo */
 .showreel-bg { position: absolute; inset: 0; overflow: hidden; z-index: 0; background: #050a14; }
-/* Vídeo esmaecido para o texto continuar legível por cima */
-.showreel-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.42; filter: saturate(1.05) contrast(1.05); will-change: transform; }
+/* Wrapper único do zoom no scroll (poster + vídeo juntos): evita o efeito fantasma de 2 layers */
+.showreel-zoom { position: absolute; inset: 0; will-change: transform; }
+/* Camada de mídia (poster + vídeo): zoom herdado do wrapper, sem will-change próprio */
+.showreel-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* Poster: visível de imediato, some de vez quando o vídeo começa (nunca coexistem = sem fantasma) */
+.showreel-poster { opacity: 1; filter: saturate(1.05) contrast(1.05); transition: opacity 0.6s ease; }
+.showreel-poster.is-hidden { opacity: 0; pointer-events: none; }
+/* Vídeo esmaecido para o texto continuar legível por cima; fade-in 1x quando começa, sem piscar em stalls.
+   Sem filter aqui: filter em <video> força re-raster por frame e trava o frame em GPU mobile. */
+.showreel-video { opacity: 0; transition: opacity 0.6s ease; }
+.showreel-video.is-started { opacity: 0.42; }
 /* Véu escuro em degradê: garante contraste do texto à direita e funde o vídeo com o fundo da página */
 .showreel-veil { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(5,10,20,0.88) 30%, rgba(5,10,20,0.55) 58%, rgba(5,10,20,0.35) 100%), linear-gradient(180deg, rgba(5,10,20,0.6), transparent 30%, transparent 65%, var(--bg-0) 98%); }
 /* No celular o texto fica sobre o vídeo: escurece mais e simplifica o véu para leitura vertical */
 @media (max-width: 960px) {
-  .showreel-video { opacity: 0.3; }
+  .showreel-video.is-started { opacity: 0.3; }
   .showreel-veil { background: linear-gradient(180deg, rgba(5,10,20,0.82), rgba(5,10,20,0.55) 50%, var(--bg-0) 98%); }
 }
 /* Acessibilidade: sem movimento, o zoom do vídeo no scroll é desligado */
 @media (prefers-reduced-motion: reduce) {
-  .showreel-video { transform: none !important; }
+  .showreel-zoom { transform: none !important; }
+  .showreel-video { transition: opacity 0.2s linear; }
 }

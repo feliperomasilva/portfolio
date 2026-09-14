@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { aboutContent } from '../../data/content';
+import { useLocale } from '../../i18n/LocaleContext';
 import { Reveal } from '../ui/Reveal';
 import { SectionHeading } from '../ui/Premium';
 import { canAnimate, ensureGsap } from '../../lib/js/motion';
@@ -38,6 +38,8 @@ const CountUp = ({ value, suffix }) => {
 // Seção Sobre: foto com parallax à esquerda + texto no meio + números + linha que cresce no scroll.
 // A foto some ao sair da seção e reaparece ao voltar (toggle via ScrollTrigger com reverse).
 const About = () => {
+  const { t } = useLocale();
+  const aboutContent = t.about;
   const lineRef = useRef(null);
   // true = profile.jpg carregou; false = mostra o placeholder com instrução (some sozinho ao adicionar a foto)
   const [photoOk, setPhotoOk] = useState(true);
@@ -67,21 +69,21 @@ const About = () => {
     <section id="about" className="section" ref={lineRef}>
       <div className="wrap">
         <Reveal variant="blur">
-          <SectionHeading index={aboutContent.index} eyebrow="sobre mim" title={aboutContent.title} />
+          <SectionHeading index={aboutContent.index} eyebrow={aboutContent.eyebrow} title={aboutContent.title} />
         </Reveal>
         <div className="about-grid">
           {/* Painel da foto: ocupa a esquerda e avança ao centro; some ao sair da seção */}
           <Reveal variant="clip" delay="d1">
-            <figure className="about-photo card" aria-label="Foto de Felipe Romao da Silva">
+            <figure className="about-photo card" aria-label={aboutContent.photoLabel}>
               {photoOk ? (
                 <img
                   src="/assets/images/profile.jpg"
-                  alt="Foto de Felipe Romao da Silva"
+                  alt={aboutContent.photoAlt}
                   loading="lazy"
                   onError={() => setPhotoOk(false)}
                 />
               ) : (
-                <span className="about-photo-empty mono">adicione sua foto em public/assets/images/profile.jpg</span>
+                <span className="about-photo-empty mono">{aboutContent.photoEmpty}</span>
               )}
               {/* Véu em degradê que funde a foto com o fundo animado da página */}
               <span className="about-photo-veil" aria-hidden="true" />
@@ -94,7 +96,7 @@ const About = () => {
               <Reveal key={i} variant="fade" delay={['d2', 'd3', 'd4'][i % 3]}><p className="about-p">{p}</p></Reveal>
             ))}
             <Reveal variant="fade" delay="d4">
-              <p className="about-promise mono">De acordo com o cliente · atenção ao detalhe · frontend + motion + backend</p>
+              <p className="about-promise mono">{aboutContent.promise}</p>
             </Reveal>
           </div>
           {/* Coluna de números: cada stat vira um card com contagem animada */}

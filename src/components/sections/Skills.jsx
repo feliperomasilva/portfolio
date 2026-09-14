@@ -1,5 +1,6 @@
 import { Braces, Palette, Wrench, Database } from 'lucide-react';
-import { skillsContent } from '../../data/content';
+import { skillsContent as baseSkills } from '../../data/content';
+import { useLocale } from '../../i18n/LocaleContext';
 import { Reveal } from '../ui/Reveal';
 import { SectionHeading } from '../ui/Premium';
 import './Skills.css';
@@ -21,21 +22,25 @@ const tilt = (e) => {
 const untilt = (e) => { e.currentTarget.style.transform = ''; };
 
 // Seção Habilidades: 4 cartões (Frontend, Motion, Ferramentas, Backend) com entrada alternada clip/scale
-const Skills = () => (
+const Skills = () => {
+  const { t } = useLocale();
+  const skillsContent = t.skills;
+  return (
   <section id="skills" className="section skills-sec">
     <div className="wrap">
       <Reveal variant="blur">
-        <SectionHeading index={skillsContent.index} eyebrow="expertise" title={skillsContent.title} sub={skillsContent.subtitle} />
+        <SectionHeading index={skillsContent.index} eyebrow={skillsContent.eyebrow} title={skillsContent.title} sub={skillsContent.subtitle} />
       </Reveal>
       <div className="skills-grid">
-        {skillsContent.categories.map((cat, i) => {
+        {baseSkills.categories.map((cat, i) => {
           const Icon = icons[cat.icon] || Braces;
+          const name = skillsContent.categories[i]?.name || cat.name;
           return (
             <Reveal key={cat.name} variant={i % 2 ? 'scale' : 'clip'} delay={['d1', 'd2', 'd3', 'd4'][i % 4]}>
               <article className="card skill-card" onMouseMove={tilt} onMouseLeave={untilt}>
                 {/* Topo: ícone em degradê + etiqueta mod-01..04 */}
                 <div className="skill-top"><span className="skill-icon"><Icon size={20} /></span><span className="readout">mod-0{i + 1}</span></div>
-                <h3>{cat.name}</h3>
+                <h3>{name}</h3>
                 <ul>
                   {cat.skills.map((s) => (
                     <li key={s}><span className="dot" />{s}</li>
@@ -49,6 +54,7 @@ const Skills = () => (
       <div className="sec-rule" />
     </div>
   </section>
-);
+  );
+};
 
 export default Skills;

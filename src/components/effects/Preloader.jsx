@@ -1,18 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLocale } from '../../i18n/LocaleContext';
 import { canAnimate, ensureGsap } from '../../lib/js/motion';
 import './Preloader.css';
 
-// Frentes que ecoam as seções (Skills/Projetos/Hero)
-const WORDS = [
-  { n: '01', label: 'Frontend', tone: 'tone-blue' },
-  { n: '02', label: 'Backend', tone: 'tone-green' },
-  { n: '03', label: 'Responsividade', tone: 'tone-ice' },
-];
+// Tones seguem a ordem das frentes (Frontend, Backend, Responsividade)
+const TONES = ['tone-blue', 'tone-green', 'tone-ice'];
 
 // Intro dark minimalista no tema do site: vazio --bg-0 com glows amber/ice/matrix,
 // nome "Felipe Romão da Silva" desenhado em stroke SVG, contador 000→100 em ~5s,
 // saída em cortina que dispara 'frs:ready' para o Hero. 1x por sessão. ESC acelera.
 const Preloader = ({ onDone }) => {
+  const { t } = useLocale();
+  const pre = t.preloader;
+  const WORDS = pre.words.map((label, i) => ({
+    n: `0${i + 1}`,
+    label,
+    tone: TONES[i % TONES.length],
+  }));
   const [visible, setVisible] = useState(() => {
     if (typeof sessionStorage === 'undefined') return true;
     return !sessionStorage.getItem('frs-preloaded');
@@ -70,9 +74,9 @@ const Preloader = ({ onDone }) => {
     tl.to(q('.boot-word'), { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: 'expo.out', stagger: 0.09 }, 2.7);
     tl.to(q('.boot-foot'), { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out' }, 2.9);
 
-    tl.call(() => setStatus('calibrando canvas…'), null, 0.5);
-    tl.call(() => setStatus('compondo hero…'), null, 2.0);
-    tl.call(() => setStatus('pronto — bem-vindo'), null, 3.8);
+    tl.call(() => setStatus(pre.status[0]), null, 0.5);
+    tl.call(() => setStatus(pre.status[1]), null, 2.0);
+    tl.call(() => setStatus(pre.status[2]), null, 3.8);
 
     tl.to(num, {
       v: 100, duration: 3.6, ease: 'power2.inOut',
@@ -98,30 +102,30 @@ const Preloader = ({ onDone }) => {
     const onKey = (e) => { if (e.key === 'Escape') skip(); };
     window.addEventListener('keydown', onKey);
     return () => { window.removeEventListener('keydown', onKey); tl.kill(); document.body.style.overflow = ''; };
-  }, [visible, onDone]);
+  }, [visible, onDone, pre.status]);
 
   if (!visible) return null;
   return (
-    <div ref={rootRef} className="preloader intro-boot" aria-label="Introdução" style={{ clipPath: 'inset(0 0 0% 0)' }}>
+    <div ref={rootRef} className="preloader intro-boot" aria-label={pre.introLabel} style={{ clipPath: 'inset(0 0 0% 0)' }}>
       <div className="boot-bg" aria-hidden="true">
         <span className="boot-glow glow-a" />
         <span className="boot-glow glow-b" />
         <span className="boot-grid" />
         <span className="boot-vignette" />
       </div>
-      <div className="boot-card" role="dialog" aria-modal="true" aria-label="Apresentação do portfólio">
+      <div className="boot-card" role="dialog" aria-modal="true" aria-label={pre.dialogLabel}>
         <div className="boot-meta">
-          <span className="mono">introdução — 01</span>
-          <span className="mono">brasil · remoto</span>
-          <span className="mono">react · motion · ui</span>
+          {pre.meta.map((m) => (
+            <span key={m} className="mono">{m}</span>
+          ))}
         </div>
         <svg className="boot-draw" viewBox="0 0 680 196" role="img" aria-label="Felipe Romão da Silva">
           <text x="50%" y="82" textAnchor="middle" className="draw-line draw-main">Felipe Romão</text>
           <text x="50%" y="152" textAnchor="middle" className="draw-line draw-second">da Silva</text>
         </svg>
         <span className="boot-rule" aria-hidden="true" />
-        <p className="boot-sub">Interfaces que parecem vivas — arquitetura frontend, back-end nas sombras, detalhe em cada pixel.</p>
-        <ul className="boot-words" aria-label="Frentes de atuação">
+        <p className="boot-sub">{pre.sub}</p>
+        <ul className="boot-words" aria-label={pre.wordsLabel}>
           {WORDS.map((w) => (
             <li key={w.n} className="boot-word">
               <span className="boot-num mono">{w.n}</span>
@@ -132,9 +136,9 @@ const Preloader = ({ onDone }) => {
         <div className="boot-foot">
           <span className="boot-count mono" ref={numRef}>000</span>
           <span className="boot-progress" aria-hidden="true"><span ref={barRef} /></span>
-          <span className="boot-status mono" ref={statusRef}>calibrando canvas…</span>
+          <span className="boot-status mono" ref={statusRef}>{pre.status[0]}</span>
           <button type="button" className="boot-skip" onClick={skip} autoFocus>
-            <kbd>ESC</kbd> pular
+            <kbd>ESC</kbd> {pre.skip}
           </button>
         </div>
       </div>

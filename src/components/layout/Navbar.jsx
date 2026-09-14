@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Menu, X, ArrowUpRight, Home, User, Cpu, Layers, Send } from 'lucide-react';
-import { navItems } from '../../data/content';
+import { useLocale } from '../../i18n/LocaleContext';
 import { scrollToId } from '../../lib/js/dom';
 import { onScrollRaf } from '../../lib/js/perf';
 import { canAnimate, ensureGsap, EASE } from '../../lib/js/motion';
 import { AnimatedIcon } from '../ui/AnimatedIcon';
+import LanguageToggle from '../ui/LanguageToggle';
 import './Navbar.css';
 
 // Para cada seção, qual animação Lottie tentar + qual ícone lucide usar se ela falhar
@@ -16,63 +17,15 @@ const NAV_ICONS = {
   contact: { lottie: 'send', Fallback: Send },
 };
 
-// Botão individual da navbar desktop: ícone + rótulo + barrinha. O ícone/barra aparecem no hover
-// (com bounce) e ficam fixos quando é a seção ativa. Tudo com guards de touch/movimento reduzido.
+// Botão individual da navbar desktop: ícone + rótulo + barrinha. Hover/ativo 100% via CSS
+// (sem GSAP/inline styles) para nunca travar com mouse rápido. Tudo com guards de touch/movimento reduzido via CSS.
 const NavButton = ({ item, active, onGo }) => {
-  const btnRef = useRef(null);
   const icon = NAV_ICONS[item.id] || NAV_ICONS.showreel;
   const IconFallback = icon.Fallback;
 
-  // Hover/foco: ícone pula para dentro com bounce + barrinha cresce da esquerda
-  const animateIn = () => {
-    if (!canAnimate() || !btnRef.current) return;
-    if (window.matchMedia('(hover: none)').matches) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const gsap = ensureGsap();
-    const btn = btnRef.current;
-    const ico = btn.querySelector('.nav-ico');
-    const bar = btn.querySelector('.nav-bar');
-    if (!ico || !bar) return;
-    const tl = gsap.timeline({ overwrite: 'auto', defaults: { ease: 'expo.out' } });
-    tl.to(ico, { scale: 1, rotate: 0, x: 0, opacity: 1, duration: 0.4, ease: 'back.out(2)' }, 0);
-    tl.to(bar, { scaleX: 1, duration: 0.4 }, 0);
-  };
-  // Saída do hover: esconde ícone/barra, EXCETO se for o botão ativo (ele mantém o estado aceso)
-  const animateOut = () => {
-    if (!canAnimate() || !btnRef.current) return;
-    if (window.matchMedia('(hover: none)').matches) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const btn = btnRef.current;
-    if (btn.classList.contains('active')) return;
-    const gsap = ensureGsap();
-    const ico = btn.querySelector('.nav-ico');
-    const bar = btn.querySelector('.nav-bar');
-    if (!ico || !bar) return;
-    const tl = gsap.timeline({ overwrite: 'auto', defaults: { ease: 'power2.inOut' } });
-    tl.to(ico, { scale: 0, rotate: 24, x: -6, opacity: 0, duration: 0.28 }, 0);
-    tl.to(bar, { scaleX: 0, duration: 0.28 }, 0);
-  };
-
-  // Quando o scrollspy troca a seção ativa, sincroniza o estado visual do botão correspondente
-  useEffect(() => {
-    const btn = btnRef.current;
-    if (!btn || !canAnimate()) return;
-    const ico = btn.querySelector('.nav-ico');
-    const bar = btn.querySelector('.nav-bar');
-    if (!ico || !bar) return;
-    const gsap = ensureGsap();
-    gsap.to(ico, { scale: active ? 1 : 0, rotate: active ? 0 : 24, x: active ? 0 : -6, opacity: active ? 1 : 0, duration: 0.35, ease: 'expo.out', overwrite: 'auto' });
-    gsap.to(bar, { scaleX: active ? 1 : 0, duration: 0.35, ease: 'expo.out', overwrite: 'auto' });
-  }, [active]);
-
   return (
     <button
-      ref={btnRef}
       onClick={() => onGo(item.id)}
-      onMouseEnter={animateIn}
-      onMouseLeave={animateOut}
-      onFocus={animateIn}
-      onBlur={animateOut}
       className={active ? 'active' : ''}
       aria-current={active ? 'true' : undefined}
     >
@@ -89,6 +42,8 @@ const NavButton = ({ item, active, onGo }) => {
 // - scrollspy (IntersectionObserver marca a seção visível), esconde ao rolar para baixo e
 //   mostra blur de fundo após 24px; trava o scroll do body com o menu mobile aberto.
 const Navbar = () => {
+  const { t } = useLocale();
+  const navItems = t.nav.items;
   const [active, setActive] = useState('showreel');
   const [open, setOpen] = useState(false);
   const headerRef = useRef(null);
@@ -110,7 +65,7 @@ const Navbar = () => {
     );
     sections.forEach((s) => obs.observe(s));
     return () => obs.disconnect();
-  }, []);
+  }, [navItems]);
 
   // Menu mobile aberto = página travada (evita rolar o fundo por trás do painel)
   useEffect(() => {
@@ -150,30 +105,34 @@ const Navbar = () => {
     <header ref={headerRef} className="nav">
       <div className="wrap nav-inner">
         {/* Marca: monograma F + nome, volta ao início */}
-        <button className="brand" onClick={() => go('showreel')} aria-label="Voltar ao início">
+        <button className="brand" onClick={() => go('showreel')} aria-label={t.nav.brandLabel}>
           <span className="brand-mark">F</span>
           <span className="brand-text">Felipe Romao <em>©2026</em></span>
         </button>
         {/* Links desktop em pílula */}
-        <nav className="nav-links nav-v2" aria-label="Navegação principal">
+        <nav className="nav-links nav-v2" aria-label={t.nav.mainLabel}>
           {navItems.map((item) => (
             <NavButton key={item.id} item={item} active={active === item.id} onGo={go} />
           ))}
         </nav>
         {/* CTA com brilho varrendo (classe shine) */}
         <div className="nav-cta">
+          <LanguageToggle />
           <button className="btn btn-primary nav-btn shine" onClick={() => go('contact')}>
             <AnimatedIcon name="send" size={18} playOn="hover" fallback={<ArrowUpRight size={18} aria-hidden="true" />} />
-            Vamos construir
+            {t.nav.cta}
           </button>
         </div>
         {/* Hambúrguer (só aparece no mobile via CSS) */}
-        <button className="menu-btn" onClick={() => setOpen(!open)} aria-label={open ? 'Fechar menu' : 'Abrir menu'} aria-expanded={open}>
+        <button className="menu-btn" onClick={() => setOpen(!open)} aria-label={open ? t.nav.closeMenu : t.nav.openMenu} aria-expanded={open}>
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
-      {/* Painel mobile: links numerados + CTA de contratação */}
+      {/* Painel mobile: toggle de idioma + links numerados + CTA de contratação */}
       <div className={`mobile-panel ${open ? 'open' : ''}`}>
+        <div className="mobile-lang">
+          <LanguageToggle />
+        </div>
         {navItems.map((item, i) => {
           const icon = NAV_ICONS[item.id] || NAV_ICONS.showreel;
           const IconFallback = icon.Fallback;
@@ -185,7 +144,7 @@ const Navbar = () => {
             </button>
           );
         })}
-        <button className="btn btn-primary" onClick={() => go('contact')}>Contratar para um projeto <ArrowUpRight size={17} /></button>
+        <button className="btn btn-primary" onClick={() => go('contact')}>{t.nav.mobileCta} <ArrowUpRight size={17} /></button>
       </div>
     </header>
   );

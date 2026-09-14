@@ -1,5 +1,6 @@
 import { ArrowUpRight, FolderGit2 } from 'lucide-react';
-import { projectsContent } from '../../data/content';
+import { projectsContent as baseProjects } from '../../data/content';
+import { useLocale } from '../../i18n/LocaleContext';
 import { Reveal } from '../ui/Reveal';
 import { SectionHeading } from '../ui/Premium';
 import './Projects.css';
@@ -19,13 +20,13 @@ const tilt = (e) => {
 const untilt = (e) => { e.currentTarget.style.transform = ''; };
 
 // Topo visual do cartão: foto real do Agrotec com véu em degradê. Outros ids retornam null (sem visual).
-const ProjectVisual = ({ project }) => {
+const ProjectVisual = ({ project, alt }) => {
   if (project.id === 'agrotec') {
     return (
       <div className="proj-visual agrotec-photo">
         <img
           src="/assets/images/agrotec.jpg"
-          alt="Captura da plataforma Agrotec — dashboard de gestão agrícola"
+          alt={alt}
           loading="lazy"
         />
         <span className="proj-visual-veil" aria-hidden="true" />
@@ -36,28 +37,31 @@ const ProjectVisual = ({ project }) => {
 };
 
 // Seção Projetos: grade de cartões vindos de projectsContent (hoje só o case real Agrotec)
-const Projects = () => (
+const Projects = () => {
+  const { t } = useLocale();
+  const projectsContent = t.projects;
+  return (
   <section id="projects" className="section">
     <div className="wrap">
       <Reveal variant="blur">
-        <SectionHeading index={projectsContent.index} eyebrow="trabalhos" title={projectsContent.title} sub={projectsContent.subtitle} />
+        <SectionHeading index={projectsContent.index} eyebrow={projectsContent.eyebrow} title={projectsContent.title} sub={projectsContent.subtitle} />
       </Reveal>
       <div className="proj-grid">
-        {projectsContent.projects.map((p, i) => (
+        {baseProjects.projects.map((p, i) => (
           <Reveal key={p.id} variant={i === 0 ? 'clip' : i === 1 ? 'scale' : 'fade'} delay={['d1', 'd2', 'd3'][i % 3]}>
             <article className={`card proj-card accent-${p.accent}`} onMouseMove={tilt} onMouseLeave={untilt}>
-              <ProjectVisual project={p} />
+              <ProjectVisual project={p} alt={projectsContent.visualAlt} />
               <div className="proj-body">
                 {/* Linha superior: número + selo de status (● no ar / ○ conceito) */}
-                <div className="proj-top"><span className="mono proj-num">{p.number}</span><span className={`status ${p.status}`}>{p.status === 'live' ? '● no ar' : '○ conceito'}</span></div>
-                <span className="readout">{p.category}</span>
+                <div className="proj-top"><span className="mono proj-num">{p.number}</span><span className={`status ${p.status}`}>{p.status === 'live' ? projectsContent.live : projectsContent.concept}</span></div>
+                <span className="readout">{projectsContent.category}</span>
                 <h3>{p.name}</h3>
-                <p>{p.description}</p>
+                <p>{projectsContent.description}</p>
                 <div className="proj-tags">{p.technologies.map((t) => <span key={t} className="tag">{t}</span>)}</div>
                 {/* Ações: site no ar (nova aba se http) + código no GitHub. margin-top:auto alinha os botões na base */}
                 <div className="proj-actions">
-                  <a href={p.link} target={p.link.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer">{p.status === 'live' ? 'Abrir projeto no ar' : 'Ver conceito'} <ArrowUpRight size={15} /></a>
-                  <a href={p.github} target="_blank" rel="noopener noreferrer" className="ghost"><FolderGit2 size={15} /> Ver código</a>
+                  <a href={p.link} target={p.link.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer">{p.status === 'live' ? projectsContent.openLive : projectsContent.openConcept} <ArrowUpRight size={15} /></a>
+                  <a href={p.github} target="_blank" rel="noopener noreferrer" className="ghost"><FolderGit2 size={15} /> {projectsContent.code}</a>
                 </div>
               </div>
             </article>
@@ -67,6 +71,7 @@ const Projects = () => (
       <div className="sec-rule" />
     </div>
   </section>
-);
+  );
+};
 
 export default Projects;

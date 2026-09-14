@@ -1,6 +1,7 @@
 import { ArrowUpRight, Copy, Check, Mail } from 'lucide-react';
 import { useState } from 'react';
-import { contactContent } from '../../data/content';
+import { contactContent as baseContact } from '../../data/content';
+import { useLocale } from '../../i18n/LocaleContext';
 import { Reveal } from '../ui/Reveal';
 import { SectionHeading } from '../ui/Premium';
 import { Magnetic } from '../ui/Magnetic';
@@ -41,6 +42,8 @@ const BrandIcon = ({ name }) => {
 
 // Seção Contato: cartão de e-mail com copiar + CTA grande com efeito shine + lista de canais (GitHub/LinkedIn/WhatsApp)
 const Contact = () => {
+  const { t } = useLocale();
+  const contactContent = t.contact;
   const [copied, setCopied] = useState(false);
   // Copia o e-mail para a área de transferência e mostra "Copiado" por 1.8s
   const copy = async () => {
@@ -57,7 +60,7 @@ const Contact = () => {
     <section id="contact" className="section contact-sec">
       <div className="wrap">
         <Reveal variant="blur">
-          <SectionHeading index={contactContent.index} eyebrow="contato direto" title={contactContent.title} sub={contactContent.subtitle} />
+          <SectionHeading index={contactContent.index} eyebrow={contactContent.eyebrow} title={contactContent.title} sub={contactContent.subtitle} />
         </Reveal>
         <div className="contact-grid">
           <div>
@@ -65,25 +68,25 @@ const Contact = () => {
             <Reveal variant="scale" delay="d2">
               <div className="card email-card">
                 <Mail size={20} className="email-icon" />
-                <a href={`mailto:${contactContent.email}?subject=Projeto%20—%20vamos%20conversar`} className="email-link">{contactContent.email}</a>
-                <button className="copy-btn" onClick={copy} aria-label={copied ? 'E-mail copiado' : 'Copiar e-mail'}>
+                <a href={`mailto:${contactContent.email}?subject=${encodeURIComponent(contactContent.mailSubject)}`} className="email-link">{contactContent.email}</a>
+                <button className="copy-btn" onClick={copy} aria-label={copied ? contactContent.copiedLabel : contactContent.copyLabel}>
                   {copied ? <Check size={16} /> : <Copy size={16} />}
-                  <span>{copied ? 'Copiado' : 'Copiar e-mail'}</span>
+                  <span>{copied ? contactContent.copied : contactContent.copy}</span>
                 </button>
               </div>
             </Reveal>
             {/* CTA principal com efeito magnético + brilho varrendo (classe shine, igual ao "Vamos construir") */}
             <Reveal variant="fade" delay="d3">
-              <Magnetic strength={0.12}>
-                <a className="btn btn-primary shine contact-big-cta" href={`mailto:${contactContent.email}?subject=Projeto%20—%20quero%20contratar&body=Olá%20Felipe,%20vi%20seu%20portfólio%20e%20quero%20conversar%20sobre%20`}>
-                  Iniciar um projeto agora <ArrowUpRight size={18} />
+              <Magnetic strength={0.05}>
+                <a className="btn btn-primary shine contact-big-cta" href={`mailto:${contactContent.email}?subject=${encodeURIComponent(contactContent.mailHire)}&body=${encodeURIComponent(contactContent.mailBody)}`}>
+                  {contactContent.bigCta} <ArrowUpRight size={18} />
                 </a>
               </Magnetic>
             </Reveal>
           </div>
           {/* Canais: cada link vira um cartão; no WhatsApp mostra o número em vez da URL */}
           <div className="contact-links">
-            {contactContent.links.map((l, i) => {
+            {baseContact.links.map((l, i) => {
               const isWhats = l.icon === 'whatsapp';
               const display = isWhats ? '+55 14 98201-9092' : l.url.replace('https://', '');
               return (

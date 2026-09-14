@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { ArrowDown, Copy, Check, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
-import { heroContent, contactContent } from '../../data/content';
+import { useLocale } from '../../i18n/LocaleContext';
 import { scrollToId } from '../../lib/js/dom';
 import { canAnimate, ensureGsap, EASE } from '../../lib/js/motion';
 import { Magnetic } from '../ui/Magnetic';
@@ -20,17 +20,19 @@ const SplitWords = ({ text, className = '' }) => (
   </span>
 );
 
-const TRACKS = [
-  { id: 'agrotec', tag: 'CASE · NO AR', title: 'Agrotec', desc: 'Site informativo com ChatBot (IA).', cta: 'Abrir projeto', href: 'https://projetoagrotec.vercel.app/' },
-  { id: 'frontend', tag: 'STACK · CSS', title: 'Frontend + Backend', desc: 'React, HTML, Python e Java Script.', cta: 'Ver habilidades', href: '#skills' },
-  { id: 'contato', tag: 'CONTATO · DIRETO', title: 'Vamos conversar?', desc: 'Contato direto por e-mail.', cta: 'Iniciar projeto', href: null },
-];
-
 const ROW = 148;
-const LOOP_TRACKS = [...TRACKS, ...TRACKS, ...TRACKS];
-const BASE = TRACKS.length * ROW;
+const BASE_TRACKS = 3;
+const BASE = BASE_TRACKS * ROW;
 
-const MomentumCard = () => {
+const trackHref = (id) => {
+  if (id === 'agrotec') return 'https://projetoagrotec.vercel.app/';
+  if (id === 'frontend') return '#skills';
+  return null;
+};
+
+const MomentumCard = ({ tracks, labels }) => {
+  const LOOP_TRACKS = [...tracks, ...tracks, ...tracks];
+  const loopLen = LOOP_TRACKS.length;
   const cardRef = useRef(null);
   const listRef = useRef(null);
   const [index, setIndex] = useState(0);
@@ -57,7 +59,7 @@ const MomentumCard = () => {
   useEffect(() => {
     const el = listRef.current;
     if (!el) return;
-    const total = TRACKS.length * ROW;
+    const total = tracks.length * ROW;
     let raf = 0;
     let inView = true;
     const wrap = (v) => {
@@ -86,9 +88,8 @@ const MomentumCard = () => {
       const center = offset.current / ROW;
       rows.forEach((r, i) => {
         let d = i - center;
-        const span = LOOP_TRACKS.length;
-        if (d > span / 2) d -= span;
-        if (d < -span / 2) d += span;
+        if (d > loopLen / 2) d -= loopLen;
+        if (d < -loopLen / 2) d += loopLen;
         const abs = Math.abs(d);
         if (abs > 2.2) {
           r.style.opacity = '0';
@@ -100,7 +101,7 @@ const MomentumCard = () => {
         r.style.opacity = String(Math.max(0, 1 - abs * 0.5));
         r.style.zIndex = String(10 - Math.round(abs * 3));
       });
-      const nearest = ((Math.round(center) % TRACKS.length) + TRACKS.length) % TRACKS.length;
+      const nearest = ((Math.round(center) % tracks.length) + tracks.length) % tracks.length;
       setIndex((p) => (p === nearest ? p : nearest));
     };
     raf = requestAnimationFrame(render);
@@ -146,7 +147,7 @@ const MomentumCard = () => {
       el.removeEventListener('touchmove', move);
       el.removeEventListener('touchend', up);
     };
-  }, []);
+  }, [tracks, loopLen]);
 
   useEffect(() => {
     const card = cardRef.current;
@@ -167,20 +168,21 @@ const MomentumCard = () => {
     return () => { card.removeEventListener('mousemove', onMove); card.removeEventListener('mouseleave', onLeave); };
   }, []);
 
-  const active = TRACKS[index];
+  const active = tracks[index % tracks.length];
   const openActive = () => {
-    if (active.href === null) scrollToId('contact');
-    else if (active.href.startsWith('#')) scrollToId(active.href.slice(1));
-    else window.open(active.href, '_blank', 'noopener');
+    const href = trackHref(active.id);
+    if (href === null) scrollToId('contact');
+    else if (href.startsWith('#')) scrollToId(href.slice(1));
+    else window.open(href, '_blank', 'noopener');
   };
 
   return (
     <div className="cy-card card" ref={cardRef}>
       <div className="cy-card-top">
-        <span className="mono">~/felipe — live</span>
-        <span className="cy-live"><i />ao vivo</span>
+        <span className="mono">~/felipe — {labels.live}</span>
+        <span className="cy-live"><i />{labels.live}</span>
       </div>
-      <div className="cy-list" ref={listRef} role="listbox" aria-label="Destaques navegáveis" tabIndex={0}
+      <div className="cy-list" ref={listRef} role="listbox" aria-label={labels.listLabel} tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown') { e.preventDefault(); go(1); }
           if (e.key === 'ArrowUp') { e.preventDefault(); go(-1); }
@@ -188,7 +190,7 @@ const MomentumCard = () => {
         }}>
         <div className="cy-list-inner">
           {LOOP_TRACKS.map((t, i) => {
-            const li = ((i % TRACKS.length) + TRACKS.length) % TRACKS.length;
+            const li = ((i % tracks.length) + tracks.length) % tracks.length;
             return (
               <button key={`${t.id}-${i}`} role="option" aria-selected={li === index} tabIndex={-1}
                 className={`cy-track ${li === index ? 'active' : ''}`} onClick={() => {
@@ -196,7 +198,7 @@ const MomentumCard = () => {
                   const span = LOOP_TRACKS.length;
                   let best = i;
                   let bestDist = Math.abs(i - cur);
-                  [i - TRACKS.length, i + TRACKS.length].forEach((c) => {
+                  [i - tracks.length, i + tracks.length].forEach((c) => {
                     if (c < 0 || c >= span) return;
                     const d = Math.abs(c - cur);
                     if (d < bestDist) { bestDist = d; best = c; }
@@ -213,11 +215,11 @@ const MomentumCard = () => {
         </div>
       </div>
       <div className="cy-controls">
-        <button onClick={() => go(-1)} aria-label="Anterior"><ChevronLeft size={18} /></button>
-        <button onClick={() => setPlaying((p) => !p)} aria-label={playing ? 'Pausar' : 'Retomar'} className="cy-play">
+        <button onClick={() => go(-1)} aria-label={labels.prev}><ChevronLeft size={18} /></button>
+        <button onClick={() => setPlaying((p) => !p)} aria-label={playing ? labels.pause : labels.play} className="cy-play">
           {playing ? <Pause size={17} /> : <Play size={17} />}
         </button>
-        <button onClick={() => go(1)} aria-label="Próximo"><ChevronRight size={18} /></button>
+        <button onClick={() => go(1)} aria-label={labels.next}><ChevronRight size={18} /></button>
         <button className="cy-open" onClick={openActive}>{active.cta}</button>
       </div>
     </div>
@@ -225,6 +227,9 @@ const MomentumCard = () => {
 };
 
 const CyberHero = () => {
+  const { t, locale } = useLocale();
+  const hero = t.hero;
+  const contact = t.contact;
   const rootRef = useRef(null);
   const [copied, setCopied] = useState(false);
 
@@ -264,40 +269,40 @@ const CyberHero = () => {
 
   const copyEmail = async () => {
     try {
-      await navigator.clipboard.writeText(contactContent.email);
+      await navigator.clipboard.writeText(contact.email);
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch { /* noop */ }
   };
 
   return (
-    <section id="showreel" className="cy-hero" ref={rootRef} aria-label="Apresentação com showreel">
+    <section id="showreel" className="cy-hero" ref={rootRef} aria-label={hero.sectionLabel}>
       <Showreel />
       <div className="cy-matrix" aria-hidden="true"><span className="cy-fade" /></div>
       <div className="wrap cy-grid">
-        <MomentumCard />
+        <MomentumCard tracks={hero.tracks} labels={hero} />
         <div className="cy-copy">
-          <p className="readout cy-eyebrow"><span className="cy-pulse" />{'// full-stack criativo — React · Motion · UI'}</p>
-          <h1 className="cy-title">
-            <span className="cy-mask"><SplitWords text={heroContent.headlineA} /></span>
-            <span className="cy-mask"><SplitWords text={heroContent.headlineB} className="cy-accent" /></span>
+          <p className="readout cy-eyebrow"><span className="cy-pulse" />{hero.eyebrow}</p>
+          <h1 className="cy-title" key={locale}>
+            <span className="cy-mask"><SplitWords text={hero.headlineA} /></span>
+            <span className="cy-mask"><SplitWords text={hero.headlineB} className="cy-accent" /></span>
           </h1>
-          <p className="cy-sub"><strong>{heroContent.name}.</strong> {heroContent.sub}</p>
+          <p className="cy-sub"><strong>{hero.name}.</strong> {hero.sub}</p>
           <div className="cy-ctas">
-            <Magnetic strength={0.12}>
+            <Magnetic strength={0.05}>
               <button className="btn btn-primary shine" onClick={() => scrollToId('projects')}>
-                <AnimatedIcon name="rocket" size={18} fallback={<ArrowDown size={17} aria-hidden="true" />} /> Ver projetos
+                <AnimatedIcon name="rocket" size={18} fallback={<ArrowDown size={17} aria-hidden="true" />} /> {hero.projectsBtn}
               </button>
             </Magnetic>
-            <Magnetic strength={0.12}>
+            <Magnetic strength={0.05}>
               <button className="btn btn-ghost" onClick={copyEmail}>
                 <AnimatedIcon name="copy" size={18} fallback={copied ? <Check size={17} aria-hidden="true" /> : <Copy size={17} aria-hidden="true" />} />
-                {copied ? 'E-mail copiado' : 'Copiar e-mail'}
+                {copied ? hero.copiedBtn : hero.copyBtn}
               </button>
             </Magnetic>
           </div>
-          <ul className="cy-proof" aria-label="Prova rápida">
-            {heroContent.proof.map((item) => (
+          <ul className="cy-proof" aria-label={hero.proofLabel}>
+            {hero.proof.map((item) => (
               <li key={item.k}><strong className="mono">{item.k}</strong><span>{item.v}</span></li>
             ))}
           </ul>

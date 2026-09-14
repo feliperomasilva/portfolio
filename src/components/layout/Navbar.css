@@ -14,20 +14,34 @@
 .nav-v2 button { display: inline-flex; align-items: center; gap: 0.45rem; background: none; border: none; color: var(--ink-mute); font-size: 0.87rem; font-weight: 600; padding: 0.6rem 0.9rem; border-radius: 999px; cursor: pointer; position: relative; min-height: 44px; transition: color 0.25s, background 0.25s, transform 0.25s var(--ease-out); }
 .nav-v2 button:hover { color: var(--ink); background: rgba(46,124,246,0.12); transform: translateY(-1px); }
 .nav-v2 button.active { color: var(--amber); background: rgba(46,124,246,0.14); }
-/* Ícone do link (JS anima escala/rotação via GSAP); box fixo de 20px para não deslocar o texto */
-.nav-ico { display: inline-flex; width: 20px; height: 20px; align-items: center; justify-content: center; flex-shrink: 0; opacity: 0; transform: scale(0) rotate(24deg) translateX(-6px); }
+/* Ícone do link (animado via CSS puro: hover/ativo mostram, mouse-out esconde — sem JS, sem travar) */
+.nav-ico { display: inline-flex; width: 20px; height: 20px; align-items: center; justify-content: center; flex-shrink: 0; opacity: 0; transform: scale(0) rotate(24deg) translateX(-6px); transition: opacity 0.28s var(--ease-out), transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; }
+@media (hover: hover) and (pointer: fine) {
+  .nav-v2 button:hover .nav-ico, .nav-v2 button:focus-visible .nav-ico { opacity: 1; transform: scale(1) rotate(0deg) translateX(0); }
+}
+.nav-v2 button.active .nav-ico { opacity: 1; transform: scale(1) rotate(0deg) translateX(0); }
+@media (prefers-reduced-motion: reduce) {
+  .nav-ico { transition: opacity 0.15s linear; transform: none; }
+  .nav-v2 button:hover .nav-ico, .nav-v2 button:focus-visible .nav-ico, .nav-v2 button.active .nav-ico { transform: none; }
+}
 .nav-ico svg, .nav-ico .anim-icon { width: 19px !important; height: 19px !important; }
 .nav-cta .btn svg, .nav-cta .btn .anim-icon { width: 18px !important; height: 18px !important; }
 .mobile-panel button svg, .mobile-panel button .anim-icon { width: 20px !important; height: 20px !important; }
-/* Barrinha sob o link ativo (scaleX animado pelo JS) */
-.nav-bar { position: absolute; left: 0.9rem; right: 0.9rem; bottom: 0.35rem; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--amber), var(--ice)); transform: scaleX(0); transform-origin: left center; }
+/* Barrinha sob o link (CSS puro: hover/ativo expandem — sem JS, sem travar) */
+.nav-bar { position: absolute; left: 0.9rem; right: 0.9rem; bottom: 0.35rem; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--amber), var(--ice)); transform: scaleX(0); transform-origin: left center; transition: transform 0.3s var(--ease-out); pointer-events: none; }
+@media (hover: hover) and (pointer: fine) {
+  .nav-v2 button:hover .nav-bar, .nav-v2 button:focus-visible .nav-bar { transform: scaleX(1); }
+}
+.nav-v2 button.active .nav-bar { transform: scaleX(1); }
 /* Brilho que varre o botão no hover (usado no "Vamos construir" e no "Iniciar um projeto agora") */
 .shine { overflow: hidden; }
 .shine::before { content: ''; position: absolute; top: 0; left: -80%; width: 60%; height: 100%; background: linear-gradient(105deg, transparent, rgba(255,255,255,0.5), transparent); transform: skewX(-20deg); transition: left 0.6s var(--ease-out); }
 .shine:hover::before { left: 130%; }
-.nav-cta { display: flex; align-items: center; gap: 1rem; }
+.nav-cta { display: flex; align-items: center; gap: 0.7rem; }
 .nav-cta .btn { display: inline-flex; align-items: center; gap: 0.5rem; }
 .nav-btn { padding: 0.6rem 1.2rem; font-size: 0.85rem; }
+/* Toggle de idioma no painel mobile: linha própria acima dos links */
+.mobile-lang { display: flex; justify-content: flex-start; padding: 0.2rem 0.4rem 0.8rem; border-bottom: 1px solid var(--line-soft); margin-bottom: 0.4rem; }
 /* Hambúrguer e painel mobile (escondidos no desktop) */
 .menu-btn { display: none; background: rgba(238,244,255,0.06); border: 1px solid var(--line-soft); color: var(--ink); border-radius: 10px; width: 44px; height: 44px; place-items: center; cursor: pointer; }
 .mobile-panel { display: none; }
