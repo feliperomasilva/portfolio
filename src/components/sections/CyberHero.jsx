@@ -6,6 +6,7 @@ import { canAnimate, ensureGsap, EASE } from '../../lib/js/motion';
 import { Magnetic } from '../ui/Magnetic';
 import { AnimatedIcon } from '../ui/AnimatedIcon';
 import Showreel from './Showreel';
+import ShowreelFrames from './ShowreelFrames';
 import './CyberHero.css';
 
 const SplitWords = ({ text, className = '' }) => (
@@ -232,10 +233,12 @@ const CyberHero = () => {
   const contact = t.contact;
   const rootRef = useRef(null);
   const [copied, setCopied] = useState(false);
+  const [framesMode, setFramesMode] = useState(true);
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
+    if (framesMode) return;
     if (!canAnimate()) { root.classList.add('play'); return; }
     const gsap = ensureGsap();
     const ctx = gsap.context(() => {
@@ -265,7 +268,7 @@ const CyberHero = () => {
       gsap.to('.cy-card', { yPercent: 6, ease: 'none', scrollTrigger: { trigger: root, start: 'top top', end: 'bottom top', scrub: 0.8 } });
     }, root);
     return () => ctx.revert();
-  }, []);
+  }, [framesMode]);
 
   const copyEmail = async () => {
     try {
@@ -277,7 +280,9 @@ const CyberHero = () => {
 
   return (
     <section id="showreel" className="cy-hero" ref={rootRef} aria-label={hero.sectionLabel}>
-      <Showreel />
+      {framesMode
+        ? <ShowreelFrames onFallback={() => setFramesMode(false)} />
+        : <Showreel />}
       <div className="cy-matrix" aria-hidden="true"><span className="cy-fade" /></div>
       <div className="wrap cy-grid">
         <MomentumCard tracks={hero.tracks} labels={hero} />

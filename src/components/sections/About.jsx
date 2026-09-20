@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocale } from '../../i18n/LocaleContext';
 import { Reveal } from '../ui/Reveal';
 import { SectionHeading } from '../ui/Premium';
+import StatIcon from '../ui/StatIcon';
 import { canAnimate, ensureGsap } from '../../lib/js/motion';
 import './About.css';
 
@@ -99,11 +100,14 @@ const About = () => {
               <p className="about-promise mono">{aboutContent.promise}</p>
             </Reveal>
           </div>
-          {/* Coluna de números: cada stat vira um card com contagem animada */}
+          {/* Coluna de números: cada stat vira um card com ícone acima + contagem animada */}
           <div className="about-stats">
-            {aboutContent.stats.map((s, i) => (
-              <Reveal key={s.label} variant="scale" delay={['d1', 'd2', 'd3', 'd4'][i % 4]}>
+            {aboutContent.stats.filter((s) => s.icon !== 'stat-original').map((s, i) => (
+              <Reveal key={s.label} variant="scale" delay={['d1', 'd2', 'd3'][i % 3]}>
                 <div className="card stat-card">
+                  <span className="stat-icon" aria-hidden="true">
+                    <StatIcon name={s.icon} size={24} />
+                  </span>
                   <strong><CountUp value={s.value} suffix={s.suffix} /></strong>
                   <span>{s.label}</span>
                 </div>

@@ -36,10 +36,9 @@ export const aboutContent = {
     'Acredito que trabalho excelente nasce da junção entre ofício, curiosidade e obsessão pelos mínimos detalhes.',
   ],
   stats: [
-    { label: 'Case real no ar', value: 1, suffix: '' },
-    { label: 'Tecnologias em produção', value: 12, suffix: '+' },
-    { label: 'Frentes de atuação', value: 4, suffix: '' },
-    { label: 'Portfólio 100% autoral', value: 100, suffix: '%' },
+    { label: 'Case real no ar', value: 1, suffix: '', icon: 'stat-live' },
+    { label: 'Tecnologias em produção', value: 12, suffix: '+', icon: 'stat-stack' },
+    { label: 'Frentes de atuação', value: 4, suffix: '', icon: 'stat-areas' },
   ],
 };
 
