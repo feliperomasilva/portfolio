@@ -2,8 +2,6 @@
 .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 70; padding-top: env(safe-area-inset-top, 0px); transition: transform 0.35s var(--ease-out), opacity 0.35s var(--ease-out), background 0.3s, border-color 0.3s; border-bottom: 1px solid transparent; }
 .nav.scrolled { background: rgba(5, 10, 20, 0.82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom-color: var(--line-soft); }
 .nav.hidden { transform: translateY(-100%); }
-body.frames-nav-hidden .nav { transform: translateY(-110%); opacity: 0; pointer-events: none; }
-body.frames-nav-done .nav { transform: none !important; opacity: 1 !important; pointer-events: auto !important; }
 .nav-inner { height: var(--nav-h); display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 /* Marca: monograma F em degradê (gira no hover) + nome */
 .brand { display: flex; align-items: center; gap: 0.7rem; background: none; border: none; color: var(--ink); cursor: pointer; min-height: 44px; }

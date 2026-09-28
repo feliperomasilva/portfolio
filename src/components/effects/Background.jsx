@@ -25,14 +25,18 @@ export const Background = () => {
     let drops = [];
     const font = 14;
 
-    // Ajusta o canvas ao tamanho da tela e reinicia as colunas de caracteres
+    // Ajusta o canvas ao tamanho da tela e reinicia as colunas de caracteres.
+    // Usa devicePixelRatio (máx 2) com ctx escalado: sem isso o texto fica
+    // borrado em telas HiDPI/retina porque 1px CSS vira vários px físicos.
     const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
       w = window.innerWidth;
       h = window.innerHeight;
-      canvas.width = w;
-      canvas.height = h;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       cols = Math.floor(w / font);
       // Limita o nº de colunas para não pesar (menor ainda no celular)
       const max = mobile() ? 44 : 90;
@@ -92,9 +96,9 @@ export const Background = () => {
   return (
     <>
       {/* O canvas em si (atrás de tudo, sem interceptar cliques) */}
-      <canvas ref={canvasRef} aria-hidden="true" style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.28 }} />
+      <canvas ref={canvasRef} className="bg-matrix" aria-hidden="true" style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.28 }} />
       {/* Véu escuro sobre o canvas para o texto das seções continuar legível */}
-      <div aria-hidden="true" style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'linear-gradient(180deg, rgba(5,10,20,0.78), rgba(5,10,20,0.38) 28%, rgba(5,10,20,0.38) 72%, rgba(5,10,20,0.86))' }} />
+      <div className="bg-matrix-veil" aria-hidden="true" style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'linear-gradient(180deg, rgba(5,10,20,0.78), rgba(5,10,20,0.38) 28%, rgba(5,10,20,0.38) 72%, rgba(5,10,20,0.86))' }} />
     </>
   );
 };

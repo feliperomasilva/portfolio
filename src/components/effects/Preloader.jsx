@@ -37,10 +37,11 @@ const Preloader = ({ onDone }) => {
 
   useEffect(() => {
     if (!visible) return;
+    const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     if (!canAnimate()) {
       finish();
-      return;
+      return () => { document.body.style.overflow = prevOverflow; };
     }
     const gsap = ensureGsap();
     const root = rootRef.current;
@@ -94,14 +95,14 @@ const Preloader = ({ onDone }) => {
       if (doneRef.current) return;
       doneRef.current = true;
       try { sessionStorage.setItem('frs-preloaded', '1'); } catch { /* noop */ }
-      document.body.style.overflow = '';
+      document.body.style.overflow = prevOverflow;
       window.dispatchEvent(new CustomEvent('frs:ready'));
       setVisible(false);
       if (onDone) onDone();
     }
     const onKey = (e) => { if (e.key === 'Escape') skip(); };
     window.addEventListener('keydown', onKey);
-    return () => { window.removeEventListener('keydown', onKey); tl.kill(); document.body.style.overflow = ''; };
+    return () => { window.removeEventListener('keydown', onKey); tl.kill(); document.body.style.overflow = prevOverflow; };
   }, [visible, onDone, pre.status]);
 
   if (!visible) return null;

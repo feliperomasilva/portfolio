@@ -1,5 +1,4 @@
 import { ArrowUpRight, FolderGit2 } from 'lucide-react';
-import { projectsContent as baseProjects } from '../../data/content';
 import { useLocale } from '../../i18n/LocaleContext';
 import { Reveal } from '../ui/Reveal';
 import { SectionHeading } from '../ui/Premium';
@@ -20,15 +19,20 @@ const tilt = (e) => {
 const untilt = (e) => { e.currentTarget.style.transform = ''; };
 
 // Topo visual do cartão: foto real do Agrotec com véu em degradê. Outros ids retornam null (sem visual).
+// WebP otimizado (1245KB → 32KB) com fallback JPG, lazy + async fora da hero.
 const ProjectVisual = ({ project, alt }) => {
   if (project.id === 'agrotec') {
     return (
       <div className="proj-visual agrotec-photo">
-        <img
-          src="/assets/images/agrotec.jpg"
-          alt={alt}
-          loading="lazy"
-        />
+        <picture>
+          <source srcSet="/assets/images/agrotec.webp" type="image/webp" />
+          <img
+            src="/assets/images/agrotec.jpg"
+            alt={alt}
+            loading="lazy"
+            decoding="async"
+          />
+        </picture>
         <span className="proj-visual-veil" aria-hidden="true" />
       </div>
     );
@@ -47,7 +51,7 @@ const Projects = () => {
         <SectionHeading index={projectsContent.index} eyebrow={projectsContent.eyebrow} title={projectsContent.title} sub={projectsContent.subtitle} />
       </Reveal>
       <div className="proj-grid">
-        {baseProjects.projects.map((p, i) => (
+        {(projectsContent.items || []).map((p, i) => (
           <Reveal key={p.id} variant={i === 0 ? 'clip' : i === 1 ? 'scale' : 'fade'} delay={['d1', 'd2', 'd3'][i % 3]}>
             <article className={`card proj-card accent-${p.accent}`} onMouseMove={tilt} onMouseLeave={untilt}>
               <ProjectVisual project={p} alt={projectsContent.visualAlt} />

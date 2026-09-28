@@ -48,19 +48,24 @@ const About = () => {
     if (!canAnimate() || !lineRef.current) return;
     const gsap = ensureGsap();
     const ctx = gsap.context(() => {
-      gsap.fromTo('.line-grow', { scaleX: 0 }, {
-        scaleX: 1, duration: 1, ease: 'expo.out',
-        scrollTrigger: { trigger: '#about', start: 'top 75%' },
+      // Cada linha decorativa cresce ao entrar na tela da PRÓPRIA seção.
+      // Antes o trigger era '#about' para todas as linhas, então as linhas de
+      // Skills/Projetos/Contato já apareciam crescidas antes do usuário chegar nelas.
+      gsap.utils.toArray('.line-grow').forEach((line) => {
+        gsap.fromTo(line, { scaleX: 0 }, {
+          scaleX: 1, duration: 0.8, ease: 'expo.out',
+          scrollTrigger: { trigger: line.closest('section') || line, start: 'top 75%' },
+        });
       });
       // Foto: entra ao chegar na seção, sai ao abandoná-la (reverse anima a saída de volta)
-      gsap.fromTo('.about-photo', { opacity: 0, y: 60, scale: 0.95 }, {
-        opacity: 1, y: 0, scale: 1, duration: 1, ease: 'expo.out',
+      gsap.fromTo('.about-photo', { opacity: 0, y: 48, scale: 0.97 }, {
+        opacity: 1, y: 0, scale: 1, duration: 0.8, ease: 'expo.out',
         scrollTrigger: { trigger: '#about', start: 'top 80%', end: 'bottom 30%', toggleActions: 'play none none reverse' },
       });
       // Parallax interno: a imagem desliza dentro da moldura seguindo o scroll da seção
-      gsap.fromTo('.about-photo img', { yPercent: -8 }, {
-        yPercent: 8, ease: 'none',
-        scrollTrigger: { trigger: '#about', start: 'top bottom', end: 'bottom top', scrub: 0.8 },
+      gsap.fromTo('.about-photo img', { yPercent: -7 }, {
+        yPercent: 7, ease: 'none',
+        scrollTrigger: { trigger: '#about', start: 'top bottom', end: 'bottom top', scrub: 0.6 },
       });
     });
     return () => ctx.revert();
@@ -77,12 +82,18 @@ const About = () => {
           <Reveal variant="clip" delay="d1">
             <figure className="about-photo card" aria-label={aboutContent.photoLabel}>
               {photoOk ? (
-                <img
-                  src="/assets/images/profile.jpg"
-                  alt={aboutContent.photoAlt}
-                  loading="lazy"
-                  onError={() => setPhotoOk(false)}
-                />
+                <picture>
+                  <source srcSet="/assets/images/profile.webp" type="image/webp" />
+                  <img
+                    src="/assets/images/profile.jpg"
+                    alt={aboutContent.photoAlt}
+                    loading="lazy"
+                    decoding="async"
+                    width="800"
+                    height="1000"
+                    onError={() => setPhotoOk(false)}
+                  />
+                </picture>
               ) : (
                 <span className="about-photo-empty mono">{aboutContent.photoEmpty}</span>
               )}

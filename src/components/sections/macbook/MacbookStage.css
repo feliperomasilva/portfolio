@@ -1,0 +1,39 @@
+/* Palco MacBook 3D: WebGL atrás + CSS3D do card por cima, sem bloquear a página.
+   - .mb-webgl: canvas do notebook (z 0, sem pointer)
+   - .mb-css3d: camada DOM do card real (pointer só no card quando legível)
+   - Fallback: card volta ao fluxo normal */
+.mb-stage { position: relative; width: 100%; height: clamp(560px, 78vh, 820px); margin-top: clamp(1.5rem, 4vw, 3rem); border-radius: 24px; overflow: hidden; background: radial-gradient(120% 100% at 50% 0%, rgba(46,124,246,0.10), transparent 60%), #050a14; border: 1px solid var(--line-soft); box-shadow: var(--shadow-card); }
+.mb-webgl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; z-index: 0; }
+.mb-css3d { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+/* O card real dentro da tela: mantém interatividade, ajusta escala de leitura.
+   pointer-events é controlado via JS (só libera após o dolly-in de leitura).
+   O hover global do .card é desligado aqui: dentro da tela 3D o translateY
+   brigaria com o CSS3DRenderer e causaria tremor/desalinhamento. */
+.mb-css3d .cy-card { pointer-events: none; transform-origin: center center; }
+.mb-css3d .cy-card:hover { transform: none; }
+.mb-screen-card { margin: 0; max-height: none; }
+/* Foco de leitura: esmaece o fundo Matrix global para a GPU respirar.
+   Seletor por classe (.bg-matrix) para não afetar o canvas WebGL do palco. */
+body.mb-stage-live .bg-matrix { opacity: 0.1 !important; transition: opacity 0.6s ease; }
+.cy-hero.mb-focus .cy-matrix { opacity: 0.4; }
+/* Hero em modo 3D: layout vertical (texto em cima, palco abaixo).
+   O slot some (altura 0) porque o card foi movido para a tela 3D.
+   Se o palco falhar, o pai desliga o mb-mode e o card volta ao fluxo. */
+.cy-hero.mb-mode .cy-grid { grid-template-columns: 1fr; gap: clamp(1.5rem, 3vw, 2.5rem); }
+.cy-hero.mb-mode .cy-copy { order: 1; max-width: 720px; justify-self: start; }
+.cy-hero.mb-mode .cy-card-slot { order: 2; min-height: 0; height: 0; overflow: hidden; visibility: hidden; }
+/* Slot original: vazio enquanto o card está na tela 3D (o nó foi movido, não clonado) */
+.cy-card-slot:empty { min-height: 1px; }
+/* Loading do chunk 3D: esqueleto com brilho enquanto o three.js baixa */
+.mb-stage.mb-loading { min-height: clamp(560px, 78vh, 820px); background: linear-gradient(100deg, #050a14 30%, #0a1526 50%, #050a14 70%); background-size: 200% 100%; animation: mb-shimmer 1.4s linear infinite; }
+@keyframes mb-shimmer { to { background-position: -200% 0; } }
+/* SplitText oficial: chars/words/lines com máscara */
+.cy-hero .st-line { display: block; overflow: hidden; padding-bottom: 0.08em; }
+.cy-hero .st-char, .cy-hero .st-word { display: inline-block; will-change: transform, opacity; }
+@media (max-width: 960px) {
+  .mb-stage { height: clamp(520px, 72vh, 640px); border-radius: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mb-stage { display: none; }
+  body.mb-stage-live .bg-matrix { opacity: 0.28 !important; }
+}

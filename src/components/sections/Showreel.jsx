@@ -5,6 +5,8 @@ import './Showreel.css';
 // Vídeo de fundo do Hero: versão leve p/ mobile (baseline, máx. compatibilidade) + 720p p/ desktop.
 // Poster extraído do 1º segundo do vídeo — aparece instantaneamente enquanto o vídeo carrega,
 // depois some de vez quando o vídeo toca (nunca ficam os dois visíveis = sem fantasma).
+// Poster em WebP otimizado (fallback JPG): LCP da hero com fetchpriority high.
+const POSTER_WEBP = '/assets/lottie/showreel-poster.webp';
 const POSTER_SRC = '/assets/lottie/showreel-poster.jpg';
 const VIDEO_MOBILE = '/assets/lottie/showreel-480.mp4';
 const VIDEO_DESKTOP = '/assets/lottie/showreel-720.mp4';
@@ -133,10 +135,17 @@ const Showreel = () => {
     };
   }, [failed]);
 
-  // Zoom de 1.0 → 1.06 acompanhando o scroll no wrapper único (poster+vídeo juntos = sem fantasma)
+  // Zoom de 1.0 → 1.06 acompanhando o scroll no wrapper único (poster+vídeo juntos = sem fantasma).
+  // Se a hero já nasceu pinada pelo palco 3D (remount/HMR com mb-mode), pula o zoom:
+  // durante o pin o fundo fica estático para não disputar atenção com o notebook.
+  // No fluxo normal o trigger é criado antes do pin existir; quando o pin ativa,
+  // o zoom apenas completa 1.06 e estabiliza (escala o wrapper interno, sem
+  // conflito com o transform do pin-spacer) — efeito cinematográfico benigno.
   useEffect(() => {
     const root = rootRef.current;
     if (!root || !canAnimate()) return;
+    const hero = root.closest('#showreel');
+    if (hero?.classList.contains('mb-mode')) return;
     const gsap = ensureGsap();
     const ctx = gsap.context(() => {
       gsap.to('.showreel-zoom', {
@@ -151,12 +160,16 @@ const Showreel = () => {
   return (
     <div className="showreel-bg" ref={rootRef} aria-hidden="true">
       <div className="showreel-zoom">
-        <img
-          className={`showreel-media showreel-poster${started ? ' is-hidden' : ''}`}
-          src={POSTER_SRC}
-          alt=""
-          draggable={false}
-        />
+        <picture>
+          <source srcSet={POSTER_WEBP} type="image/webp" />
+          <img
+            className={`showreel-media showreel-poster${started ? ' is-hidden' : ''}`}
+            src={POSTER_SRC}
+            alt=""
+            draggable={false}
+            fetchpriority="high"
+          />
+        </picture>
         {!failed && (
           <video
             ref={videoRef}
@@ -171,7 +184,9 @@ const Showreel = () => {
           />
         )}
       </div>
-      {/* Véu escuro em degradê que garante o contraste do texto sobre o vídeo */}
+      {/* Véu escuro em degradê que garante o contraste do texto sobre o vídeo.
+          picture/section são inline por padrão: aqui viram bloco para não
+          abrir linha fantasma de 4px sob o poster. */}
       <span className="showreel-veil" />
     </div>
   );

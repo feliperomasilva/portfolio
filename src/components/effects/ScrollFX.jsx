@@ -8,25 +8,25 @@ const ScrollFX = () => {
     if (!canAnimate()) return;
     const gsap = ensureGsap();
     const ctx = gsap.context(() => {
-      // Títulos das seções flutuam para cima enquanto atravessam a tela
+      // Títulos das seções flutuam para cima enquanto atravessam a tela — scrub rápido p/ resposta premium
       gsap.utils.toArray('.sec-title-premium').forEach((el) => {
-        gsap.fromTo(el, { y: 28 }, {
-          y: -28, ease: 'none',
-          scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.8 },
+        gsap.fromTo(el, { y: 22 }, {
+          y: -22, ease: 'none',
+          scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.6 },
         });
       });
       // Imagens/visuais dos projetos deslizam levemente dentro do cartão
       gsap.utils.toArray('.proj-visual').forEach((el) => {
-        gsap.fromTo(el, { yPercent: -6 }, {
-          yPercent: 6, ease: 'none',
-          scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.8 },
+        gsap.fromTo(el, { yPercent: -5 }, {
+          yPercent: 5, ease: 'none',
+          scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.6 },
         });
       });
       // Cards de estatística com deriva vertical sutil
       gsap.utils.toArray('.stat-card').forEach((el) => {
-        gsap.fromTo(el, { y: 20 }, {
-          y: -20, ease: 'none',
-          scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.8 },
+        gsap.fromTo(el, { y: 16 }, {
+          y: -16, ease: 'none',
+          scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.6 },
         });
       });
       // Linhas divisórias crescem e ganham opacidade ao entrar na tela
@@ -45,15 +45,22 @@ const ScrollFX = () => {
         });
       }
     });
-    // Recalcula as posições após carregar tudo, após o preloader e com atraso de segurança (fontes/vídeo)
+    // Recalcula as posições após carregar tudo, após o preloader e com atraso de segurança (fontes/vídeo).
+    // Também recalcula ao trocar o idioma: os textos PT/EN têm comprimentos diferentes
+    // e mudam a altura das seções (sem isso o parallax/trigger fica desalinhado).
     const onLoad = () => refreshScroll();
+    let localeT = 0;
+    const onLocale = () => { clearTimeout(localeT); localeT = setTimeout(() => refreshScroll(), 120); };
     window.addEventListener('load', onLoad);
     window.addEventListener('frs:ready', onLoad);
+    window.addEventListener('frs:locale', onLocale);
     const t = setTimeout(() => refreshScroll(), 900);
     return () => {
       window.removeEventListener('load', onLoad);
       window.removeEventListener('frs:ready', onLoad);
+      window.removeEventListener('frs:locale', onLocale);
       clearTimeout(t);
+      clearTimeout(localeT);
       ctx.revert();
     };
   }, []);

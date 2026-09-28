@@ -1,6 +1,5 @@
 import { ArrowUpRight, Copy, Check, Mail } from 'lucide-react';
 import { useState } from 'react';
-import { contactContent as baseContact } from '../../data/content';
 import { useLocale } from '../../i18n/LocaleContext';
 import { Reveal } from '../ui/Reveal';
 import { SectionHeading } from '../ui/Premium';
@@ -45,14 +44,35 @@ const Contact = () => {
   const { t } = useLocale();
   const contactContent = t.contact;
   const [copied, setCopied] = useState(false);
-  // Copia o e-mail para a área de transferência e mostra "Copiado" por 1.8s
+  // Copia o e-mail para a área de transferência e mostra "Copiado" por 1.8s.
+  // Com fallback para contextos sem Clipboard API (HTTP, permissões negadas, iOS antigo).
   const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(contactContent.email);
+    const done = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
+    };
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(contactContent.email);
+        done();
+        return;
+      }
+      throw new Error('no-clipboard');
     } catch {
-      setCopied(false);
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = contactContent.email;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        done();
+      } catch {
+        setCopied(false);
+      }
     }
   };
 
@@ -86,7 +106,7 @@ const Contact = () => {
           </div>
           {/* Canais: cada link vira um cartão; no WhatsApp mostra o número em vez da URL */}
           <div className="contact-links">
-            {baseContact.links.map((l, i) => {
+            {(contactContent.links || []).map((l, i) => {
               const isWhats = l.icon === 'whatsapp';
               const display = isWhats ? '+55 14 98201-9092' : l.url.replace('https://', '');
               return (

@@ -1,5 +1,4 @@
 import { Braces, Palette, Wrench, Database } from 'lucide-react';
-import { skillsContent as baseSkills } from '../../data/content';
 import { useLocale } from '../../i18n/LocaleContext';
 import { Reveal } from '../ui/Reveal';
 import { SectionHeading } from '../ui/Premium';
@@ -32,9 +31,9 @@ const Skills = () => {
         <SectionHeading index={skillsContent.index} eyebrow={skillsContent.eyebrow} title={skillsContent.title} sub={skillsContent.subtitle} />
       </Reveal>
       <div className="skills-grid">
-        {baseSkills.categories.map((cat, i) => {
+        {skillsContent.categories.map((cat, i) => {
           const Icon = icons[cat.icon] || Braces;
-          const name = skillsContent.categories[i]?.name || cat.name;
+          const name = cat.name;
           return (
             <Reveal key={cat.name} variant={i % 2 ? 'scale' : 'clip'} delay={['d1', 'd2', 'd3', 'd4'][i % 4]}>
               <article className="card skill-card" onMouseMove={tilt} onMouseLeave={untilt}>

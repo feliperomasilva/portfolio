@@ -1,24 +1,19 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, lazy, Suspense } from 'react';
 import { ArrowDown, Copy, Check, ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { useLocale } from '../../i18n/LocaleContext';
 import { scrollToId } from '../../lib/js/dom';
-import { canAnimate, ensureGsap, EASE } from '../../lib/js/motion';
+import { canAnimate, ensureGsap, ensureSplitText, refreshScroll, EASE } from '../../lib/js/motion';
+import { prefersReducedMotion } from '../../lib/js/device';
 import { Magnetic } from '../ui/Magnetic';
 import { AnimatedIcon } from '../ui/AnimatedIcon';
 import Showreel from './Showreel';
-import ShowreelFrames from './ShowreelFrames';
 import './CyberHero.css';
 
-const SplitWords = ({ text, className = '' }) => (
-  <span className={`split-words ${className}`} aria-label={text}>
-    {String(text)
-      .split(' ')
-      .map((w, i) => (
-        <span key={i} className="w-word" aria-hidden="true">
-          <span className="w-inner">{w}</span>
-        </span>
-      ))}
-  </span>
+// Palco 3D sob demanda: three.js (~600KB) fora do bundle inicial.
+// Chunk tolerante a falha de rede: se o download falhar, renderiza null
+// (card fica no fluxo normal) em vez de travar o Suspense para sempre.
+const MacbookStage = lazy(() =>
+  import('./macbook/MacbookStage').catch(() => ({ default: () => null }))
 );
 
 const ROW = 148;
@@ -53,7 +48,8 @@ const MomentumCard = ({ tracks, labels }) => {
   useEffect(() => {
     if (!playing) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const id = setInterval(() => go(1), 4200);
+    // Pausa o autoplay com a aba oculta para não acumular snaps ao voltar.
+    const id = setInterval(() => { if (!document.hidden) go(1); }, 4200);
     return () => clearInterval(id);
   }, [playing, go]);
 
@@ -61,6 +57,8 @@ const MomentumCard = ({ tracks, labels }) => {
     const el = listRef.current;
     if (!el) return;
     const total = tracks.length * ROW;
+    // Cache das linhas: evita querySelectorAll a cada frame (~60x/s)
+    const rows = Array.from(el.querySelectorAll('.cy-track'));
     let raf = 0;
     let inView = true;
     const wrap = (v) => {
@@ -82,10 +80,8 @@ const MomentumCard = ({ tracks, labels }) => {
         offset.current += vel.current;
         vel.current *= 0.94;
         if (Math.abs(vel.current) < 0.05) vel.current = 0;
-        if (vel.current === 0) offset.current = wrap(offset.current);
-        else offset.current = wrap(offset.current);
+        offset.current = wrap(offset.current);
       }
-      const rows = el.querySelectorAll('.cy-track');
       const center = offset.current / ROW;
       rows.forEach((r, i) => {
         let d = i - center;
@@ -110,13 +106,15 @@ const MomentumCard = ({ tracks, labels }) => {
       dragging.current = true;
       snap.current = null;
       vel.current = 0;
-      lastY.current = e.touches ? e.touches[0].clientY : e.clientY;
+      lastY.current = e.clientY;
       lastT.current = performance.now();
     };
+    // Pointer Events cobrem mouse + touch + caneta; os listeners touch duplicados
+    // foram removidos (disparavam junto e aplicavam o deslocamento 2x no mobile).
+    // touch-action: pan-y no CSS mantém a rolagem vertical da página.
     const move = (e) => {
       if (!dragging.current) return;
-      if (e.cancelable && e.touches) e.preventDefault();
-      const y = e.touches ? e.touches[0].clientY : e.clientY;
+      const y = e.clientY;
       const dy = lastY.current - y;
       offset.current = wrap(offset.current + dy);
       const t = performance.now();
@@ -133,9 +131,7 @@ const MomentumCard = ({ tracks, labels }) => {
     el.addEventListener('pointerdown', down);
     window.addEventListener('pointermove', move, { passive: true });
     window.addEventListener('pointerup', up);
-    el.addEventListener('touchstart', down, { passive: true });
-    el.addEventListener('touchmove', move, { passive: false });
-    el.addEventListener('touchend', up);
+    window.addEventListener('pointercancel', up);
     const obs = new IntersectionObserver(([e]) => { inView = e.isIntersecting; }, { threshold: 0 });
     obs.observe(el);
     return () => {
@@ -144,9 +140,7 @@ const MomentumCard = ({ tracks, labels }) => {
       el.removeEventListener('pointerdown', down);
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
-      el.removeEventListener('touchstart', down);
-      el.removeEventListener('touchmove', move);
-      el.removeEventListener('touchend', up);
+      window.removeEventListener('pointercancel', up);
     };
   }, [tracks, loopLen]);
 
@@ -158,11 +152,16 @@ const MomentumCard = ({ tracks, labels }) => {
     const rX = gsap.quickTo(card, 'rotationX', { duration: 0.7, ease: 'power3' });
     const rY = gsap.quickTo(card, 'rotationY', { duration: 0.7, ease: 'power3' });
     const onMove = (e) => {
+      // Dentro da tela 3D o transform é dono do CSS3DRenderer — não disputar.
+      if (card.classList.contains('mb-screen-card')) return;
       const r = card.getBoundingClientRect();
       rX((((e.clientY - r.top) / r.height - 0.5) * -6).toFixed(2));
       rY((((e.clientX - r.left) / r.width - 0.5) * 8).toFixed(2));
     };
-    const onLeave = () => { rX(0); rY(0); };
+    const onLeave = () => {
+      if (card.classList.contains('mb-screen-card')) return;
+      rX(0); rY(0);
+    };
     card.style.transformPerspective = '1100px';
     card.addEventListener('mousemove', onMove);
     card.addEventListener('mouseleave', onLeave);
@@ -232,65 +231,161 @@ const CyberHero = () => {
   const hero = t.hero;
   const contact = t.contact;
   const rootRef = useRef(null);
+  const slotRef = useRef(null);
+  const titleARef = useRef(null);
+  const titleBRef = useRef(null);
   const [copied, setCopied] = useState(false);
-  const [framesMode, setFramesMode] = useState(true);
+  // 3D sob demanda: só monta o palco após a intro (preloader) liberar a hero.
+  const [stageOn, setStageOn] = useState(false);
+  // Palco 3D desistiu (sem WebGL / sem card / erro): remove o palco e volta ao
+  // layout normal com o card no fluxo — nunca deixa caixa vazia na hero.
+  const [stageOff, setStageOff] = useState(false);
+  const reduced = prefersReducedMotion();
 
+  // Liga o palco 3D após o preloader (ou de imediato se já passou / sem animação).
+  // Sem setState síncrono no efeito: agenda via rAF/timeout para não encadear renders.
+  // Aparelho fraco não bloqueia: o palco monta com qualidade reduzida (sem sombras,
+  // pixel ratio menor); só movimento reduzido desliga o 3D de vez.
+  // Watchdog de 3s: se o chunk lazy travar (rede), desliga o mb-mode para o card
+  // voltar ao fluxo em vez de ficar escondido no slot vazio.
+  useEffect(() => {
+    if (reduced) return;
+    let alive = true;
+    const on = () => { if (alive) setStageOn(true); };
+    try {
+      if (sessionStorage.getItem('frs-preloaded')) {
+        const id = requestAnimationFrame(on);
+        return () => { alive = false; cancelAnimationFrame(id); };
+      }
+    } catch { /* noop */ }
+    window.addEventListener('frs:ready', on, { once: true });
+    const t = setTimeout(on, 6000);
+    return () => { alive = false; window.removeEventListener('frs:ready', on); clearTimeout(t); };
+  }, [reduced]);
+
+  // Watchdog do palco: se o stage montou mas falhou sem avisar (ex: componente null
+  // por chunk quebrado), o mb-mode esconderia o card — desliga e restaura o fluxo.
+  useEffect(() => {
+    if (!stageOn || stageOff) return;
+    const id = setTimeout(() => {
+      const cardInScreen = document.querySelector('.mb-css3d .cy-card');
+      if (!cardInScreen) setStageOff(true);
+    }, 4000);
+    return () => clearTimeout(id);
+  }, [stageOn, stageOff]);
+
+  // SplitText oficial: "Interfaces que / parecem vivas." com máscara + stagger de chars.
+  // Sub/nome sem fatiar: fade/y sutil na mesma timeline (hierarquia preservada).
+  // À prova de falha: watchdog de 3.5s garante o texto visível mesmo se GSAP/SplitText
+  // travar (CDN, exceção silenciosa, StrictMode double-effect); 'play' sem a classe
+  // .play também revela via CSS. Troca de idioma reconstrói o split do zero.
   useEffect(() => {
     const root = rootRef.current;
-    if (!root) return;
-    if (framesMode) return;
-    if (!canAnimate()) { root.classList.add('play'); return; }
+    if (!root || !titleARef.current || !titleBRef.current) return;
+    root.classList.add('play');
+    if (!canAnimate()) return;
     const gsap = ensureGsap();
+    const SplitText = ensureSplitText();
+    let splitA = null;
+    let splitB = null;
+    let onReady = null;
+    let done = false;
+    // Watchdog: se a intro não concluir em 3.5s, força estado final visível.
+    const watchdog = setTimeout(() => {
+      if (done) return;
+      done = true;
+      try {
+        gsap.set(['.cy-eyebrow', '.cy-sub', '.cy-ctas', '.cy-proof'], { opacity: 1, y: 0, clearProps: 'transform' });
+        if (splitA) gsap.set(splitA.chars, { yPercent: 0, opacity: 1, clearProps: 'transform' });
+        if (splitB) gsap.set(splitB.chars, { yPercent: 0, opacity: 1, clearProps: 'transform' });
+      } catch { /* noop */ }
+    }, 3500);
     const ctx = gsap.context(() => {
-      gsap.set(['.cy-eyebrow', '.cy-sub', '.cy-ctas', '.cy-proof', '.cy-card'], { opacity: 0, y: 26 });
-      gsap.set('.cy-hero .w-word', { opacity: 0.12 });
-      gsap.set('.cy-hero .w-inner', { y: 26, opacity: 0 });
+      gsap.set(['.cy-eyebrow', '.cy-sub', '.cy-ctas', '.cy-proof'], { opacity: 0, y: 22 });
+      try {
+        splitA = new SplitText(titleARef.current, { type: 'chars,words,lines', linesClass: 'st-line', charsClass: 'st-char', wordsClass: 'st-word', mask: 'lines' });
+        splitB = new SplitText(titleBRef.current, { type: 'chars,words,lines', linesClass: 'st-line', charsClass: 'st-char', wordsClass: 'st-word', mask: 'lines' });
+      } catch {
+        done = true;
+        clearTimeout(watchdog);
+        gsap.set(['.cy-eyebrow', '.cy-sub', '.cy-ctas', '.cy-proof'], { opacity: 1, y: 0 });
+        return;
+      }
+      gsap.set([splitA.chars, splitB.chars].flat(), { yPercent: 115, opacity: 0 });
       const play = () => {
+        if (done) return;
+        done = true;
+        clearTimeout(watchdog);
         const tl = gsap.timeline({ defaults: { ease: EASE.out } });
-        tl.to('.cy-eyebrow', { opacity: 1, y: 0, duration: 0.5 })
-          .to('.cy-hero .w-word', { opacity: 1, duration: 0.5 }, 0.08)
-          .to('.cy-hero .w-inner', { y: 0, opacity: 1, duration: 0.9, stagger: 0.09 }, 0.08)
-          .to('.cy-sub', { opacity: 1, y: 0, duration: 0.6 }, 0.5)
-          .to('.cy-ctas', { opacity: 1, y: 0, duration: 0.6 }, 0.62)
-          .to('.cy-proof', { opacity: 1, y: 0, duration: 0.5 }, 0.74)
-          .to('.cy-card', { opacity: 1, y: 0, duration: 0.9 }, 0.6);
-        root.classList.add('play');
+        tl.to('.cy-eyebrow', { opacity: 1, y: 0, duration: 0.45 }, 0)
+          .to(splitA.chars, { yPercent: 0, opacity: 1, duration: 0.7, stagger: 0.018 }, 0.06)
+          .to(splitB.chars, { yPercent: 0, opacity: 1, duration: 0.7, stagger: 0.018 }, 0.22)
+          .to('.cy-sub', { opacity: 1, y: 0, duration: 0.55 }, 0.55)
+          .to('.cy-ctas', { opacity: 1, y: 0, duration: 0.55 }, 0.65)
+          .to('.cy-proof', { opacity: 1, y: 0, duration: 0.45 }, 0.75);
+        refreshScroll();
       };
-      if (sessionStorage.getItem('frs-preloaded')) play();
-      else window.addEventListener('frs:ready', play, { once: true });
-      gsap.to('.cy-hero .w-word', {
-        y: -10,
-        ease: 'none',
-        stagger: 0.06,
-        scrollTrigger: { trigger: root, start: 'top top', end: 'bottom top', scrub: 0.8 },
-      });
-      gsap.to('.cy-copy', { yPercent: -4, opacity: 0.55, ease: 'none', scrollTrigger: { trigger: root, start: 'top top', end: 'bottom top', scrub: 0.8 } });
-      gsap.to('.cy-card', { yPercent: 6, ease: 'none', scrollTrigger: { trigger: root, start: 'top top', end: 'bottom top', scrub: 0.8 } });
+      let played = false;
+      const once = () => { if (!played) { played = true; play(); } };
+      onReady = once;
+      try {
+        if (sessionStorage.getItem('frs-preloaded')) once();
+        else window.addEventListener('frs:ready', once, { once: true });
+      } catch { once(); }
+      // Rede de segurança: se o preloader travar sem disparar, toca sozinho em 2.5s.
+      setTimeout(once, 2500);
     }, root);
-    return () => ctx.revert();
-  }, [framesMode]);
+    return () => {
+      clearTimeout(watchdog);
+      if (onReady) window.removeEventListener('frs:ready', onReady);
+      ctx.revert();
+      try { splitA?.revert(); } catch { /* noop */ }
+      try { splitB?.revert(); } catch { /* noop */ }
+    };
+  }, [locale]);
 
   const copyEmail = async () => {
-    try {
-      await navigator.clipboard.writeText(contact.email);
+    const done = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
-    } catch { /* noop */ }
+    };
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(contact.email);
+        done();
+        return;
+      }
+      throw new Error('no-clipboard');
+    } catch {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = contact.email;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        done();
+      } catch { /* mantém "Copiar e-mail" sem travar */ }
+    }
   };
 
   return (
-    <section id="showreel" className="cy-hero" ref={rootRef} aria-label={hero.sectionLabel}>
-      {framesMode
-        ? <ShowreelFrames onFallback={() => setFramesMode(false)} />
-        : <Showreel />}
+    <section id="showreel" className={`cy-hero${stageOn && !reduced && !stageOff ? ' mb-mode' : ''}`} ref={rootRef} aria-label={hero.sectionLabel}>
+      {/* Fundo: vídeo leve (mobile/desktop) — os 300 frames com pin de 5000px foram removidos. */}
+      <Showreel />
       <div className="cy-matrix" aria-hidden="true"><span className="cy-fade" /></div>
       <div className="wrap cy-grid">
-        <MomentumCard tracks={hero.tracks} labels={hero} />
+        <div className="cy-card-slot" ref={slotRef}>
+          <MomentumCard tracks={hero.tracks} labels={hero} />
+        </div>
         <div className="cy-copy">
           <p className="readout cy-eyebrow"><span className="cy-pulse" />{hero.eyebrow}</p>
-          <h1 className="cy-title" key={locale}>
-            <span className="cy-mask"><SplitWords text={hero.headlineA} /></span>
-            <span className="cy-mask"><SplitWords text={hero.headlineB} className="cy-accent" /></span>
+          <h1 className="cy-title" key={locale} aria-label={`${hero.headlineA} ${hero.headlineB}`}>
+            <span className="cy-mask" aria-hidden="true"><span ref={titleARef} className="st-split">{hero.headlineA}</span></span>
+            <span className="cy-mask" aria-hidden="true"><span ref={titleBRef} className="st-split cy-accent">{hero.headlineB}</span></span>
           </h1>
           <p className="cy-sub"><strong>{hero.name}.</strong> {hero.sub}</p>
           <div className="cy-ctas">
@@ -313,6 +408,15 @@ const CyberHero = () => {
           </ul>
         </div>
       </div>
+      {/* Palco 3D: notebook procedural com o card real na tela (carregado sob demanda).
+          Se o palco desistir (onFallback), sai de cena e o card volta ao fluxo. */}
+      {stageOn && !reduced && !stageOff && (
+        <div className="wrap mb-wrap">
+          <Suspense fallback={<div className="mb-stage mb-loading" aria-hidden="true" />}>
+            <MacbookStage cardSlotRef={slotRef} onFallback={() => setStageOff(true)} />
+          </Suspense>
+        </div>
+      )}
     </section>
   );
 };

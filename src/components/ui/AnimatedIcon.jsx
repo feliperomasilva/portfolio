@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 
 // O player Lottie é pesado: carrega sob demanda (lazy) para não entrar no bundle inicial
 const LottieLazy = lazy(() => import('lottie-react').then((m) => ({ default: m.Lottie })));
@@ -7,10 +7,11 @@ const LottieLazy = lazy(() => import('lottie-react').then((m) => ({ default: m.L
 const cache = {};
 
 // Ícone animado (Lottie) com fallback estático: enquanto o JSON não chega, mostra o ícone lucide.
-// Props: name (arquivo /assets/lottie/{name}.json), size, fallback, playOn ('hover' toca no hover, 'always' sempre).
+// Props: name (arquivo /assets/lottie/{name}.json; null desliga o fetch e usa só o fallback), size, fallback, playOn ('hover' toca no hover, 'always' sempre).
+// lottie-react v3: autoplay/loop são config de carga (trocar recria a animação), então hover usa lottieRef.play()/pause() sem remontar.
 export const AnimatedIcon = ({ name, size = 20, className = '', fallback = null, playOn = 'hover', ...rest }) => {
-  const [data, setData] = useState(() => cache[name] || null);
-  const [playing, setPlaying] = useState(playOn === 'always');
+  const [data, setData] = useState(() => (name ? cache[name] || null : null));
+  const lottieRef = useRef(null);
 
   // Baixa o JSON uma vez; flag cancelled evita setState após desmontar
   useEffect(() => {
@@ -30,8 +31,9 @@ export const AnimatedIcon = ({ name, size = 20, className = '', fallback = null,
   // Sem JSON ainda: renderiza o fallback (ícone estático), então nunca fica vazio
   if (!data) return fallback;
 
-  const enter = () => { if (playOn === 'hover') setPlaying(true); };
-  const leave = () => { if (playOn === 'hover') setPlaying(false); };
+  const always = playOn === 'always';
+  const enter = () => { if (!always) { try { lottieRef.current?.play(); } catch { /* noop */ } } };
+  const leave = () => { if (!always) { try { lottieRef.current?.pause(); } catch { /* noop */ } } };
 
   return (
     <span
@@ -45,7 +47,13 @@ export const AnimatedIcon = ({ name, size = 20, className = '', fallback = null,
       {...rest}
     >
       <Suspense fallback={fallback}>
-        <LottieLazy src={data} autoplay={playing} loop={playing} style={{ width: size, height: size }} />
+        <LottieLazy
+          lottieRef={lottieRef}
+          src={data}
+          autoplay={always}
+          loop
+          style={{ width: size, height: size }}
+        />
       </Suspense>
     </span>
   );

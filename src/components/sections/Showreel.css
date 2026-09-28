@@ -3,8 +3,11 @@
 .showreel-bg { position: absolute; inset: 0; overflow: hidden; z-index: 0; background: #050a14; }
 /* Wrapper único do zoom no scroll (poster + vídeo juntos): evita o efeito fantasma de 2 layers */
 .showreel-zoom { position: absolute; inset: 0; will-change: transform; }
-/* Camada de mídia (poster + vídeo): zoom herdado do wrapper, sem will-change próprio */
+/* Camada de mídia (poster + vídeo): zoom herdado do wrapper, sem will-change próprio.
+   picture do poster vira bloco cobrindo a hero (inline abriria linha fantasma de 4px). */
 .showreel-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.showreel-zoom picture.showreel-media, .showreel-zoom picture { position: absolute; inset: 0; display: block; }
+.showreel-zoom picture img { width: 100%; height: 100%; object-fit: cover; display: block; }
 /* Poster: visível de imediato, some de vez quando o vídeo começa (nunca coexistem = sem fantasma) */
 .showreel-poster { opacity: 1; filter: saturate(1.05) contrast(1.05); transition: opacity 0.6s ease; }
 .showreel-poster.is-hidden { opacity: 0; pointer-events: none; }

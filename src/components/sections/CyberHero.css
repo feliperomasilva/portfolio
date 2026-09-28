@@ -11,14 +11,12 @@
 /* Rótulo superior com ponto pulsante */
 .cy-eyebrow { display: inline-flex; align-items: center; gap: 0.6rem; margin-bottom: 1.2rem; color: var(--ice); }
 .cy-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--matrix); animation: pulse-dot 2s ease-in-out infinite; }
-/* Título gigante; cada linha é uma máscara para as palavras subirem de dentro */
+/* Título gigante; SplitText oficial divide em linhas com máscara (st-line).
+   Estado inicial 100% visível no CSS: o GSAP esconde via JS só quando vai animar.
+   Se o JS/GSAP falhar, o texto continua legível (nunca hero vazia). */
 .cy-title { margin-bottom: 1.1rem; font-size: clamp(3rem, 6.5vw, 5.6rem); }
 .cy-mask { display: block; overflow: hidden; padding-bottom: 0.08em; }
-/* Fatiamento por palavra: .w-word recorta, .w-inner é o que o GSAP move */
-.split-words { display: inline; }
-.w-word { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: 0.08em; margin-bottom: -0.08em; margin-right: 0.24em; }
-.w-word:last-child { margin-right: 0; }
-.w-inner { display: inline-block; will-change: transform, opacity; }
+.st-split { display: inline; }
 .cy-accent { color: var(--amber); }
 .cy-sub { font-size: clamp(1rem, 1.7vw, 1.15rem); max-width: 50ch; margin-bottom: 1.7rem; }
 .cy-sub strong { color: var(--ink); }
@@ -31,6 +29,10 @@
 .anim-icon { vertical-align: -3px; }
 /* Cartão carrossel */
 .cy-card { padding: 1.1rem; display: flex; flex-direction: column; gap: 0.8rem; min-height: 420px; }
+/* Slot que ancora o card no fluxo (o palco 3D move o próprio nó para a tela e o devolve no cleanup) */
+.cy-card-slot { order: 1; min-height: 420px; }
+.cy-card-slot .cy-card { height: 100%; }
+.mb-wrap { position: relative; z-index: 2; padding-bottom: 1rem; }
 .cy-card-top { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--ink-mute); }
 .cy-live { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--matrix); font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; }
 .cy-live i { width: 7px; height: 7px; border-radius: 50%; background: var(--matrix); animation: pulse-dot 1.6s ease-in-out infinite; }
@@ -54,7 +56,7 @@
 @media (max-width: 960px) {
   .cy-grid { grid-template-columns: 1fr; gap: 1.8rem; }
   .cy-copy { order: 1; justify-self: start; max-width: 100%; }
-  .cy-card { order: 2; }
+  .cy-card-slot { order: 2; min-height: 400px; }
   .cy-hero { min-height: auto; padding-bottom: 2rem; }
   .cy-card { min-height: 400px; }
   .cy-ctas .magnetic { flex: 1 1 100%; display: flex; }
@@ -68,6 +70,6 @@
 }
 /* Acessibilidade: sem movimento, tudo visível e parado */
 @media (prefers-reduced-motion: reduce) {
-  .cy-eyebrow, .cy-sub, .cy-ctas, .cy-proof, .cy-card, .w-word, .w-inner { opacity: 1 !important; transform: none !important; }
+  .cy-eyebrow, .cy-sub, .cy-ctas, .cy-proof, .cy-card, .st-line, .st-char, .st-word { opacity: 1 !important; transform: none !important; }
   .cy-pulse, .cy-live i { animation: none; }
 }

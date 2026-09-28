@@ -70,10 +70,10 @@ export const STRINGS = {
       title: 'Caixa de ferramentas, calibrada.',
       subtitle: 'Um conjunto construído ao longo do tempo com aprendizado contínuo e aplicação em projetos reais.',
       categories: [
-        { name: 'Frontend' },
-        { name: 'Mobile' },
-        { name: 'Ferramentas' },
-        { name: 'Backend & Dados' },
+        { name: 'Frontend', icon: 'code', skills: ['React', 'JavaScript', 'TypeScript', 'HTML', 'CSS'] },
+        { name: 'Mobile', icon: 'palette', skills: ['Flutter', 'Three.js', 'Responsividade', 'ScrollTrigger'] },
+        { name: 'Ferramentas', icon: 'wrench', skills: ['Git', 'GitHub', 'VS Code', 'Figma', 'Netlify', 'Vercel'] },
+        { name: 'Backend & Dados', icon: 'database', skills: ['Node.js', 'Python', 'PostgreSQL', 'NPM'] },
       ],
     },
     projects: {
@@ -89,6 +89,18 @@ export const STRINGS = {
       visualAlt: 'Captura da plataforma Agrotec',
       category: 'Site informativo · Projeto em parceria com técnico em agronegócio.',
       description: 'Site informativo com dicas, alternativas, riscos etc., com SOS direto (em caso de emergência) para a ANVISA em caso de intoxicação.',
+      items: [
+        {
+          id: 'agrotec',
+          number: '01',
+          name: 'Agrotec',
+          technologies: ['JavaScript', 'CSS', 'HTML'],
+          link: 'https://projetoagrotec.vercel.app/',
+          github: 'https://github.com/feliperomasilva/projeto-agrotec',
+          status: 'live',
+          accent: 'amber',
+        },
+      ],
     },
     contact: {
       index: '04',
@@ -104,6 +116,11 @@ export const STRINGS = {
       mailSubject: 'Projeto — vamos conversar',
       mailHire: 'Projeto — quero contratar',
       mailBody: 'Olá Felipe, vi seu portfólio e quero conversar sobre ',
+      links: [
+        { label: 'GitHub', url: 'https://github.com/feliperomasilva', icon: 'github' },
+        { label: 'LinkedIn', url: 'https://www.linkedin.com/in/feliperomao-dev', icon: 'linkedin' },
+        { label: 'WhatsApp', url: 'https://wa.me/5514982019092?text=Ol%C3%A1%20Felipe%2C%20vi%20seu%20portf%C3%B3lio%20e%20quero%20conversar.', icon: 'whatsapp' },
+      ],
     },
     preloader: {
       introLabel: 'Introdução',
@@ -195,10 +212,10 @@ export const STRINGS = {
       title: 'Toolbox, calibrated.',
       subtitle: 'A toolkit built over time with continuous learning and real-world projects.',
       categories: [
-        { name: 'Frontend' },
-        { name: 'Mobile' },
-        { name: 'Tools' },
-        { name: 'Backend & Data' },
+        { name: 'Frontend', icon: 'code', skills: ['React', 'JavaScript', 'TypeScript', 'HTML', 'CSS'] },
+        { name: 'Mobile', icon: 'palette', skills: ['Flutter', 'Three.js', 'Responsiveness', 'ScrollTrigger'] },
+        { name: 'Tools', icon: 'wrench', skills: ['Git', 'GitHub', 'VS Code', 'Figma', 'Netlify', 'Vercel'] },
+        { name: 'Backend & Data', icon: 'database', skills: ['Node.js', 'Python', 'PostgreSQL', 'NPM'] },
       ],
     },
     projects: {
@@ -214,6 +231,18 @@ export const STRINGS = {
       visualAlt: 'Agrotec platform screenshot',
       category: 'Informative site · Project in partnership with an agribusiness technician.',
       description: 'Informative site with tips, alternatives, risks etc., with direct SOS (in case of emergency) to ANVISA in case of intoxication.',
+      items: [
+        {
+          id: 'agrotec',
+          number: '01',
+          name: 'Agrotec',
+          technologies: ['JavaScript', 'CSS', 'HTML'],
+          link: 'https://projetoagrotec.vercel.app/',
+          github: 'https://github.com/feliperomasilva/projeto-agrotec',
+          status: 'live',
+          accent: 'amber',
+        },
+      ],
     },
     contact: {
       index: '04',
@@ -229,6 +258,11 @@ export const STRINGS = {
       mailSubject: 'Project — lets talk',
       mailHire: 'Project — hire request',
       mailBody: 'Hi Felipe, I saw your portfolio and want to talk about ',
+      links: [
+        { label: 'GitHub', url: 'https://github.com/feliperomasilva', icon: 'github' },
+        { label: 'LinkedIn', url: 'https://www.linkedin.com/in/feliperomao-dev', icon: 'linkedin' },
+        { label: 'WhatsApp', url: 'https://wa.me/5514982019092?text=Ol%C3%A1%20Felipe%2C%20vi%20seu%20portf%C3%B3lio%20e%20quero%20conversar.', icon: 'whatsapp' },
+      ],
     },
     preloader: {
       introLabel: 'Introduction',

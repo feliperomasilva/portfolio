@@ -8,9 +8,10 @@ import { AnimatedIcon } from '../ui/AnimatedIcon';
 import LanguageToggle from '../ui/LanguageToggle';
 import './Navbar.css';
 
-// Para cada seção, qual animação Lottie tentar + qual ícone lucide usar se ela falhar
+// Para cada seção, qual animação Lottie tentar + qual ícone lucide usar se ela falhar.
+// `lottie: null` usa só o fallback sem disparar fetch 404 (ex: showreel não tem home.json).
 const NAV_ICONS = {
-  showreel: { lottie: 'home', Fallback: Home },
+  showreel: { lottie: null, Fallback: Home },
   about: { lottie: 'user', Fallback: User },
   skills: { lottie: 'cpu', Fallback: Cpu },
   projects: { lottie: 'layers', Fallback: Layers },
@@ -67,9 +68,24 @@ const Navbar = () => {
     return () => obs.disconnect();
   }, [navItems]);
 
-  // Menu mobile aberto = página travada (evita rolar o fundo por trás do painel)
+  // Menu mobile aberto = página travada (evita rolar o fundo por trás do painel).
+  // Guarda a posição para restaurar exatamente onde o usuário estava (iOS costuma
+  // perder o scrollY ao alternar overflow:hidden no body).
   useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : '';
+    if (open) {
+      const y = window.scrollY;
+      document.body.style.top = `-${y}px`;
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, y);
+      };
+    }
     return () => { document.body.style.overflow = ''; };
   }, [open]);
 
@@ -86,9 +102,11 @@ const Navbar = () => {
     });
   }, [open]);
 
-  // Entrada em cascata dos itens do menu mobile (só desktop-pequeno/tablet, com animação permitida)
+  // Entrada em cascata dos itens do menu mobile (com animação permitida).
+  // Sem guarda de largura: o painel só existe no mobile via CSS (≤900px), então
+  // o filtro antigo (só animava com width ≥768) deixava os celulares sem cascata.
   useEffect(() => {
-    if (!open || !canAnimate() || window.innerWidth < 768) return;
+    if (!open || !canAnimate()) return;
     const ctx = ensureGsap().context(() => {
       ensureGsap().fromTo('.mobile-panel button', { opacity: 0, x: -28 }, { opacity: 1, x: 0, duration: 0.5, ease: EASE.out, stagger: 0.07, delay: 0.1, clearProps: 'transform,opacity' });
     });

@@ -3,10 +3,13 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+import { SplitText } from 'gsap/SplitText';
 import { prefersReducedMotion } from './device';
 
 // Flag interna: garante que os plugins do GSAP sejam registrados uma única vez
 let registered = false;
+// SplitText oficial (GSAP 3.13+ é gratuito): split por chars/words/lines com máscaras e aria preservada.
+let splitRegistered = false;
 // Devolve o gsap já configurado (registra ScrollTrigger + ScrollToPlugin na primeira chamada)
 export const ensureGsap = () => {
   if (registered || typeof window === 'undefined') return gsap;
@@ -19,6 +22,17 @@ export const ensureGsap = () => {
   return gsap;
 };
 
+// Registra o SplitText oficial uma única vez e o devolve. Retorna null fora do browser.
+export const ensureSplitText = () => {
+  if (typeof window === 'undefined') return null;
+  ensureGsap();
+  if (!splitRegistered) {
+    gsap.registerPlugin(SplitText);
+    splitRegistered = true;
+  }
+  return SplitText;
+};
+
 // Curvas de easing padrão do site (sempre as mesmas, para o movimento parecer um sistema só)
 export const EASE = {
   out: 'expo.out', // entradas suaves que desaceleram no fim
@@ -27,8 +41,8 @@ export const EASE = {
   css: 'cubic-bezier(0.22, 1, 0.36, 1)', // mesma curva em CSS puro
 };
 
-// Durações padrão (em segundos): curta, rápida, média e lenta
-export const DUR = { instant: 0.25, fast: 0.45, med: 0.8, slow: 1.1 };
+// Durações padrão (em segundos): curta, rápida, média e lenta — calibradas p/ premium (snappy, <1s)
+export const DUR = { instant: 0.22, fast: 0.4, med: 0.7, slow: 0.9 };
 
 // Pode animar? Retorna false fora do navegador ou se o usuário pediu "reduzir movimento"
 export const canAnimate = () => typeof window !== 'undefined' && !prefersReducedMotion();
@@ -43,7 +57,18 @@ export const scrollToId = (id) => {
     return;
   }
   ensureGsap();
-  gsap.to(window, { duration: 1, ease: EASE.out, scrollTo: { y: el, offsetY: 76 } });
+  // O CSS global usa scroll-behavior:smooth; durante o tween do ScrollToPlugin o
+  // navegador aplicaria suavização dupla (CSS + GSAP) e a rolagem fica lenta/
+  // imprecisa. Desliga temporariamente e restaura ao concluir/cancelar.
+  // offsetY 84 = mesmo respiro do scroll-padding-top global (nav 68px + 16px).
+  const root = document.documentElement;
+  const prev = root.style.scrollBehavior;
+  root.style.scrollBehavior = 'auto';
+  const restore = () => { root.style.scrollBehavior = prev; };
+  gsap.to(window, {
+    duration: 1, ease: EASE.out, scrollTo: { y: el, offsetY: 84 },
+    onComplete: restore, onInterrupt: restore,
+  });
 };
 
 // Reexporta o ScrollTrigger para os componentes criarem triggers sem importar o gsap direto
