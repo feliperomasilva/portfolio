@@ -49,3 +49,5 @@ Thumbs.db
 /.superpowers
 /docs
 /.codegraph
+/.tsconfig.app.tsbuildinfo
+/.tsconfig.node.tsbuildinfo
