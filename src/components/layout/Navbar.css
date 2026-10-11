@@ -45,15 +45,32 @@
 /* Hambúrguer e painel mobile (escondidos no desktop) */
 .menu-btn { display: none; background: rgba(238,244,255,0.06); border: 1px solid var(--line-soft); color: var(--ink); border-radius: 10px; width: 44px; height: 44px; place-items: center; cursor: pointer; }
 .mobile-panel { display: none; }
-/* Mobile: esconde links/CTA desktop, mostra hambúrguer; painel abre por max-height (sem blur, mais barato) */
+/* Faixa intermediária (tablet/desktop estreito 901–1150px): a pílula + marca +
+   toggle + CTA somam ~980px e estouravam ~100px. Encolhe marca (só monograma),
+   paddings e fontes para caber sem cortar o CTA. */
+@media (max-width: 1150px) and (min-width: 901px) {
+  .nav-inner { gap: 0.6rem; }
+  .brand-text { display: none; }
+  /* Ícones ocupam 20px cada mesmo invisíveis (opacity 0): some com eles aqui,
+     a barrinha (.nav-bar) continua marcando hover/ativo. Economiza ~100px. */
+  .nav-v2 .nav-ico { display: none; }
+  .nav-v2 button { padding: 0.6rem 0.65rem; font-size: 0.8rem; }
+  .nav-cta { gap: 0.5rem; }
+  .nav-cta .btn { padding: 0.6rem 0.9rem; font-size: 0.8rem; }
+}
+/* Mobile: esconde links/CTA desktop, mostra hambúrguer; painel abre por
+   grid-rows 0fr->1fr (só composite, sem o reflow do max-height fixo; altura
+   automática p/ PT/EN) + fade/deslize do conteúdo. Sem blur, mais barato. */
 @media (max-width: 900px) {
   .nav-inner { gap: 0.6rem; }
   .brand-text { display: none; }
   .nav-links, .nav-v2, .nav-cta { display: none; }
   .menu-btn { display: grid; }
   .nav.scrolled { background: rgba(5, 10, 20, 0.94); backdrop-filter: none; -webkit-backdrop-filter: none; }
-  .mobile-panel { display: flex; flex-direction: column; gap: 0.4rem; padding: 1rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px)); background: #050a14; border-bottom: 1px solid var(--line-soft); max-height: 0; overflow: hidden; padding-top: 0; padding-bottom: 0; transition: max-height 0.4s var(--ease-out), padding 0.3s; }
-  .mobile-panel.open { max-height: 560px; padding-top: 1rem; padding-bottom: 1.5rem; }
+  .mobile-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.4s var(--ease-out); }
+  .mobile-panel.open { grid-template-rows: 1fr; }
+  .mobile-panel-inner { overflow: hidden; min-height: 0; display: flex; flex-direction: column; gap: 0.4rem; padding: 0 1.25rem; opacity: 0; transform: translateY(-8px); transition: opacity 0.3s var(--ease-out), transform 0.35s var(--ease-out), padding 0.3s; }
+  .mobile-panel.open .mobile-panel-inner { padding: 1rem 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px)); opacity: 1; transform: translateY(0); background: #050a14; border-bottom: 1px solid var(--line-soft); }
   .mobile-panel button { text-align: left; background: none; border: none; color: var(--ink-dim); font-size: 1.15rem; font-weight: 600; font-family: var(--font-display); padding: 0.7rem 0.4rem; border-bottom: 1px solid var(--line-soft); cursor: pointer; display: flex; gap: 1rem; align-items: center; min-height: 48px; }
   .mobile-panel button .mono { font-size: 0.72rem; color: var(--amber); }
   .mobile-panel button.active { color: var(--amber); }

@@ -1,4 +1,4 @@
-# Felipe Romao da Silva - Portfolio
+# Felipe Romao Dias da Silva - Portfolio
 
 Um portfólio digital desenvolvido com React, JavaScript e HTML.
 

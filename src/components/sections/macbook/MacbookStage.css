@@ -2,7 +2,7 @@
    - .mb-webgl: canvas do notebook (z 0, sem pointer)
    - .mb-css3d: camada DOM do card real (pointer só no card quando legível)
    - Fallback: card volta ao fluxo normal */
-.mb-stage { position: relative; width: 100%; height: clamp(560px, 78vh, 820px); margin-top: clamp(1.5rem, 4vw, 3rem); border-radius: 24px; overflow: hidden; background: radial-gradient(120% 100% at 50% 0%, rgba(46,124,246,0.10), transparent 60%), #050a14; border: 1px solid var(--line-soft); box-shadow: var(--shadow-card); }
+.mb-stage { position: relative; width: 100%; height: clamp(560px, 76vh, 780px); border-radius: 24px; overflow: hidden; background: radial-gradient(120% 100% at 50% 0%, rgba(46,124,246,0.12), transparent 60%), #050a14; border: 1px solid var(--line-soft); box-shadow: var(--shadow-card), 0 0 80px rgba(46,124,246,0.08); cursor: default; }
 .mb-webgl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; z-index: 0; }
 .mb-css3d { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
 /* O card real dentro da tela: mantém interatividade, ajusta escala de leitura.
@@ -11,29 +11,79 @@
    brigaria com o CSS3DRenderer e causaria tremor/desalinhamento. */
 .mb-css3d .cy-card { pointer-events: none; transform-origin: center center; }
 .mb-css3d .cy-card:hover { transform: none; }
-.mb-screen-card { margin: 0; max-height: none; }
+/* Cursor do teclado 3D: o JS alterna .mb-hit no mount (1 raycast/frame max
+   no tick existente) em vez de inline style — evita reflow por frame.
+   Só em fine-pointer: touch nunca vê cursor pointer. */
+@media (hover: hover) and (pointer: fine) {
+  .mb-stage.mb-hit { cursor: pointer; }
+}
+/* Fallback a11y do power: espelha o botão 3D (inacessível no pin 85%).
+   Canto inferior-direito do stage, invisível até receber foco de teclado. */
+.mb-power-fallback { position: absolute; right: 12px; bottom: 12px; z-index: 2; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line-soft); background: rgba(5,10,20,0.7); color: #dfeaff; font-size: 18px; line-height: 1; opacity: 0; cursor: pointer; }
+.mb-stage:hover .mb-power-fallback { opacity: .35; }
+.mb-power-fallback:focus-visible { opacity: 1; outline: 2px solid #2e7cf6; outline-offset: 2px; }
+.mb-screen-card { margin: 0; max-height: none; transition: opacity 0.45s ease; }
+/* Task 3: fade do card ao desligar (o tick esconde ao assentar; o fade
+   cobre os ~0.9s da transição do display). O transition vive na base
+   (não só no .mb-power-fade): ao religar, remover a classe dá fade-IN
+   de verdade em vez de retorno instantâneo. Sem visibility aqui: o JS
+   controla visibility para concluir o fade antes de ocultar. */
+.mb-screen-card.mb-power-fade { opacity: 0; }
+/* Step 0 (Task 3) + fix I2: ROW sync — track 148px = ROW em CyberHero.tsx
+   (fonte única). Altura nativa cresce via padding + .cy-list (viewport,
+   sync-safe); NUNCA via track. .cy-list 436px → nativo ~= 680px
+   (pxH ~= pxW/1.59) para o cover-100% vertical ligar junto do cap 1.02. */
+.mb-css3d .mb-screen-card {
+  width: 1080px;
+  min-height: 0;
+  /* Safe-area lateral (fix C1): no pin-85% o card projeta 655px contra o
+     mount de 478px (over 89/89 simétrico) — o display projetado (~650px)
+     também excede o mount, então só o cap 1.02 não salva os glifos.
+     Inset 170px/lado >> 89/0.6065 = 147px necessários: títulos, descs,
+     labels e controles ficam na faixa visível central. Altura nativa
+     inalterada (padding vertical + .cy-list intocados). */
+  padding: 4rem 170px;
+  font-size: 19px;
+  gap: 1.6rem;
+}
+.mb-css3d .mb-screen-card .cy-list { height: 436px; }
+.mb-css3d .mb-screen-card .cy-track { height: 148px; top: -74px; }
+.mb-css3d .mb-screen-card .cy-track strong { font-size: 1.9rem; }
+.mb-css3d .mb-screen-card .cy-desc { font-size: 1.05rem; }
 /* Foco de leitura: esmaece o fundo Matrix global para a GPU respirar.
    Seletor por classe (.bg-matrix) para não afetar o canvas WebGL do palco. */
 body.mb-stage-live .bg-matrix { opacity: 0.1 !important; transition: opacity 0.6s ease; }
 .cy-hero.mb-focus .cy-matrix { opacity: 0.4; }
-/* Hero em modo 3D: layout vertical (texto em cima, palco abaixo).
+/* Hero em modo 3D: mantém 2 colunas lado a lado (texto esquerda, notebook direita).
    O slot some (altura 0) porque o card foi movido para a tela 3D.
    Se o palco falhar, o pai desliga o mb-mode e o card volta ao fluxo. */
-.cy-hero.mb-mode .cy-grid { grid-template-columns: 1fr; gap: clamp(1.5rem, 3vw, 2.5rem); }
-.cy-hero.mb-mode .cy-copy { order: 1; max-width: 720px; justify-self: start; }
-.cy-hero.mb-mode .cy-card-slot { order: 2; min-height: 0; height: 0; overflow: hidden; visibility: hidden; }
+.cy-hero.mb-mode .cy-grid { grid-template-columns: 1.15fr 0.85fr; }
+.cy-hero.mb-mode .cy-copy { max-width: 640px; justify-self: start; }
+.cy-hero.mb-mode .cy-card-slot { min-height: 0; height: 0; overflow: hidden; visibility: hidden; }
 /* Slot original: vazio enquanto o card está na tela 3D (o nó foi movido, não clonado) */
 .cy-card-slot:empty { min-height: 1px; }
 /* Loading do chunk 3D: esqueleto com brilho enquanto o three.js baixa */
 .mb-stage.mb-loading { min-height: clamp(560px, 78vh, 820px); background: linear-gradient(100deg, #050a14 30%, #0a1526 50%, #050a14 70%); background-size: 200% 100%; animation: mb-shimmer 1.4s linear infinite; }
+@media (max-width: 960px) {
+  .mb-stage.mb-loading { min-height: clamp(400px, 52vh, 480px); }
+}
 @keyframes mb-shimmer { to { background-position: -200% 0; } }
 /* SplitText oficial: chars/words/lines com máscara */
 .cy-hero .st-line { display: block; overflow: hidden; padding-bottom: 0.08em; }
 .cy-hero .st-char, .cy-hero .st-word { display: inline-block; will-change: transform, opacity; }
 @media (max-width: 960px) {
-  .mb-stage { height: clamp(520px, 72vh, 640px); border-radius: 18px; }
+  /* Mobile: palco mais baixo e colado no conteúdo — o notebook agora preenche
+     o frame (câmera próxima), então a altura antiga (520-640px) sobrava vazio
+     acima/abaixo. 400-480px mantém o notebook inteiro sem folga. */
+  .mb-stage { height: clamp(400px, 52vh, 480px); border-radius: 18px; }
+  .cy-hero.mb-mode .cy-grid { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   .mb-stage { display: none; }
   body.mb-stage-live .bg-matrix { opacity: 0.28 !important; }
+}
+/* Task 4: shimmer só durante loading — animação infinita retida custa
+   composição mesmo fora da tela; sem .mb-loading não há keyframe ativo. */
+@media (prefers-reduced-motion: reduce) {
+  .mb-stage.mb-loading { animation: none; }
 }

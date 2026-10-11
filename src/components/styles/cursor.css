@@ -1,0 +1,37 @@
+/* Cursor customizado: glow que segue o mouse. Recolorido p/ tokens do portfolio. */
+.cursor-main {
+  --size: 0px;
+  position: fixed;
+  top: calc(var(--size) / -2);
+  left: calc(var(--size) / -2);
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50px;
+  pointer-events: none;
+  z-index: 9998;
+  background-color: var(--ice);
+  box-shadow: 0px 0px 30px 0px rgba(46, 124, 246, 0.8);
+  mix-blend-mode: difference;
+  /* Posição via transform (quickTo, GPU) — nunca transicionar top/left
+     (layout + paint por frame). Só tamanho/opacidade animam. */
+  transition: width 0.3s var(--ease-out), height 0.3s var(--ease-out), opacity 0.25s var(--ease-out);
+  will-change: transform;
+}
+.cursor-icons {
+  top: 10px;
+  left: 10px;
+  height: calc(var(--cursorH) - 20px);
+  transition: width 0.35s var(--ease-out), height 0.35s var(--ease-out), opacity 0.25s var(--ease-out);
+}
+.cursor-disable {
+  --size: 0px;
+  opacity: 0;
+}
+@media only screen and (min-width: 1024px) and (pointer: fine) {
+  .cursor-main {
+    --size: 50px;
+  }
+  .cursor-disable {
+    --size: 0px;
+  }
+}

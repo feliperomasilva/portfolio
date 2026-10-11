@@ -2,7 +2,7 @@
 
 /* Wrapper do efeito magnético (o JS move esse elemento) */
 .magnetic { display: inline-flex; }
-@media (hover: hover) and (pointer: fine) { .magnetic { will-change: transform; } }
+.magnetic.mag-live { will-change: transform; }
 /* Altura mínima para o Reveal medir a posição mesmo antes do conteúdo aparecer */
 .rv-g { min-height: 1px; }
 /* Botão grande "Iniciar um projeto agora" */

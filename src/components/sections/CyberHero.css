@@ -1,12 +1,32 @@
-/* Hero: tela cheia com vídeo ao fundo (z 0), véu (z 1) e conteúdo por cima (z 2).
-   Desktop: cartão à esquerda (0.82fr) + texto à direita (1.18fr). Mobile: texto primeiro, cartão depois. */
+/* Hero: tela cheia com shader + matrix ao fundo (z 0), véu (z 1) e conteúdo por cima (z 2).
+   Desktop: texto à esquerda (1.15fr) + notebook à direita (0.85fr). Mobile: texto primeiro, visual depois. */
 .cy-hero { position: relative; z-index: 1; min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; padding-top: calc(var(--nav-h) + 2rem); padding-bottom: 4rem; overflow: hidden; }
-/* Véu extra sobre o vídeo (além do .showreel-veil) para fundir topo/base com o fundo da página */
-.cy-matrix { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+/* Véu extra sobre o fundo para fundir topo/base com o fundo da página */
+.cy-matrix { position: absolute; inset: 0; pointer-events: none; z-index: 1; transition: opacity 0.6s ease; }
 .cy-fade { position: absolute; inset: 0; background: radial-gradient(ellipse 90% 75% at 50% 40%, transparent 30%, var(--bg-0) 88%), linear-gradient(180deg, rgba(5,10,20,0.55), transparent 30%, transparent 65%, var(--bg-0) 98%); }
-.cy-grid { position: relative; z-index: 2; display: grid; grid-template-columns: 0.82fr 1.18fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
-.cy-copy { order: 2; max-width: 640px; justify-self: end; width: 100%; }
-.cy-card { order: 1; }
+/* Barra de progresso do pin do notebook: preenche com o scroll (via --mb-p no palco, só transform/opacity).
+   Some fora do modo 3D e no mobile (sem pin: o scrub é livre, a barra nunca
+   preencheria — escondida para não parecer quebrada). */
+.cy-progress { position: absolute; top: 0; left: 0; right: 0; height: 2px; z-index: 3; pointer-events: none; opacity: 0; transition: opacity 0.5s ease; background: rgba(125,211,252,0.12); }
+.cy-progress::after { content: ''; display: block; height: 100%; transform-origin: 0 50%; transform: scaleX(var(--mb-p, 0)); background: linear-gradient(90deg, var(--amber), var(--ice)); box-shadow: 0 0 12px rgba(46,124,246,0.6); }
+.cy-hero.mb-mode .cy-progress { opacity: 1; }
+.cy-hero.mb-mode .mb-stage { --mb-p: 0; }
+.cy-hero.mb-mode .mb-stage::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; z-index: 2; pointer-events: none; background: rgba(125,211,252,0.08); }
+.cy-hero.mb-mode .mb-stage::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; z-index: 2; pointer-events: none; transform-origin: 0 50%; transform: scaleX(var(--mb-p, 0)); background: linear-gradient(90deg, var(--amber), var(--ice)); }
+.cy-grid { position: relative; z-index: 2; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: clamp(2rem, 4vw, 3.5rem); align-items: center; }
+.cy-copy { order: 1; max-width: 640px; justify-self: start; width: 100%; }
+/* Sombra sob o texto para leitura sobre o shader */
+.cy-copy .cy-title, .cy-copy .cy-sub { text-shadow: 0 2px 18px rgba(5,10,20,0.85), 0 1px 6px rgba(5,10,20,0.9); }
+/* Coluna visual da direita: slot do card + palco 3D lado a lado com o texto */
+.cy-visual { order: 2; position: relative; width: 100%; min-height: 420px; will-change: transform, opacity; }
+/* Entrada do visual: fade + subida curta (GPU) quando o .play chega (mesmo clock do SplitText) */
+.cy-hero .cy-visual { opacity: 0; transform: translateY(26px); }
+.cy-hero.play .cy-visual { animation: cy-visual-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.55s forwards; }
+@keyframes cy-visual-in { to { opacity: 1; transform: translateY(0); } }
+/* Hover glow no palco: borda acende sem re-render (só box-shadow/border via CSS) */
+.cy-hero.mb-mode .mb-stage { transition: box-shadow 0.45s ease, border-color 0.45s ease; }
+.cy-hero.mb-mode .mb-stage:hover { border-color: rgba(46,124,246,0.35); box-shadow: var(--shadow-lift), 0 0 120px rgba(46,124,246,0.14); }
+.cy-card { order: unset; }
 .cy-copy .cy-title { text-wrap: balance; letter-spacing: -0.035em; }
 /* Rótulo superior com ponto pulsante */
 .cy-eyebrow { display: inline-flex; align-items: center; gap: 0.6rem; margin-bottom: 1.2rem; color: var(--ice); }
@@ -30,9 +50,12 @@
 /* Cartão carrossel */
 .cy-card { padding: 1.1rem; display: flex; flex-direction: column; gap: 0.8rem; min-height: 420px; }
 /* Slot que ancora o card no fluxo (o palco 3D move o próprio nó para a tela e o devolve no cleanup) */
-.cy-card-slot { order: 1; min-height: 420px; }
+.cy-card-slot { min-height: 420px; }
 .cy-card-slot .cy-card { height: 100%; }
-.mb-wrap { position: relative; z-index: 2; padding-bottom: 1rem; }
+/* Em modo 3D o slot some (altura 0) porque o card foi movido para a tela.
+   O palco ocupa a coluna visual inteira. */
+.cy-hero.mb-mode .cy-card-slot { min-height: 0; height: 0; overflow: hidden; visibility: hidden; }
+.cy-hero.mb-mode .cy-visual .mb-stage { position: relative; margin-top: 0; }
 .cy-card-top { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--ink-mute); }
 .cy-live { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--matrix); font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; }
 .cy-live i { width: 7px; height: 7px; border-radius: 50%; background: var(--matrix); animation: pulse-dot 1.6s ease-in-out infinite; }
@@ -52,11 +75,14 @@
 .cy-controls .cy-play { border-color: rgba(46,124,246,0.35); color: var(--amber); }
 .cy-open { margin-left: auto; padding: 0 1.1rem; font-size: 0.85rem; font-weight: 700; background: var(--amber) !important; color: #f2f7ff !important; border-color: transparent !important; }
 .cy-open:hover { background: #4a90ff !important; color: #fff !important; }
-/* Tablet/mobile: empilha (texto antes do cartão), botões viram largura total */
+/* Tablet/mobile: empilha (texto antes do visual), botões viram largura total.
+   Barra de progresso do pin some: mobile usa scrub livre, sem pin. */
 @media (max-width: 960px) {
+  .cy-progress { display: none; }
   .cy-grid { grid-template-columns: 1fr; gap: 1.8rem; }
   .cy-copy { order: 1; justify-self: start; max-width: 100%; }
-  .cy-card-slot { order: 2; min-height: 400px; }
+  .cy-visual { order: 2; min-height: 400px; }
+  .cy-card-slot { min-height: 400px; }
   .cy-hero { min-height: auto; padding-bottom: 2rem; }
   .cy-card { min-height: 400px; }
   .cy-ctas .magnetic { flex: 1 1 100%; display: flex; }
@@ -71,5 +97,7 @@
 /* Acessibilidade: sem movimento, tudo visível e parado */
 @media (prefers-reduced-motion: reduce) {
   .cy-eyebrow, .cy-sub, .cy-ctas, .cy-proof, .cy-card, .st-line, .st-char, .st-word { opacity: 1 !important; transform: none !important; }
+  .cy-hero .cy-visual { opacity: 1 !important; transform: none !important; animation: none !important; }
+  .cy-progress { display: none; }
   .cy-pulse, .cy-live i { animation: none; }
 }

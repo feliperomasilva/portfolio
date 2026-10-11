@@ -1,0 +1,118 @@
+/* Rail social fixa (desktop): ícones magnéticos + botão CV vertical.
+   Cores remapeadas p/ tokens do portfolio. Mobile: oculta (contato tem os links). */
+.icons-section {
+  position: fixed;
+  max-width: 1180px;
+  width: min(1180px, 100% - 2.5rem);
+  bottom: 0;
+  z-index: 50;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.social-icons {
+  position: absolute;
+  left: -20px;
+  bottom: 20px;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 51;
+  padding: 10px;
+  pointer-events: auto;
+}
+.social-icons:hover {
+  transition: 0.3s;
+  color: var(--bg-0);
+}
+.social-icons a:hover {
+  color: var(--amber);
+}
+.social-icons span {
+  width: 50px;
+  height: 50px;
+  position: relative;
+  display: flex;
+}
+.social-icons a {
+  --siLeft: 50%;
+  --siTop: 50%;
+  position: absolute;
+  left: var(--siLeft, 50%);
+  top: var(--siTop, 50%);
+  transform: translate(-50%, -50%);
+  display: flex;
+  font-size: 23px;
+  color: var(--ink-dim);
+  /* Sem will-change permanente: a camada GPU só existe durante o follow
+     (classe .si-live, colocada/removida pelo JS). Fora isso é custo à toa. */
+  transition: transform 0.3s var(--ease-out), color 0.3s;
+}
+.social-icons a.si-live { will-change: left, top; }
+.resume-button {
+  position: absolute;
+  z-index: 51;
+  display: flex;
+  gap: 5px;
+  bottom: 40px;
+  right: 0;
+  width: auto;
+  text-wrap: nowrap;
+  letter-spacing: 4px;
+  font-size: 15px;
+  line-height: 15px;
+  font-weight: 600;
+  color: var(--ink-mute);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: 0.5s;
+  transform-origin: left bottom;
+  transform: translateX(100%) rotateZ(-90deg);
+  pointer-events: auto;
+  font-family: inherit;
+}
+.resume-button:hover {
+  color: var(--ink);
+}
+div.resume-button span,
+.resume-button span {
+  color: var(--ink);
+  font-size: 17px;
+  margin-top: -1px;
+  display: flex;
+  align-items: center;
+}
+@media only screen and (min-width: 900px) {
+  .social-icons {
+    display: flex;
+    gap: 20px;
+  }
+  .social-icons a {
+    font-size: 28px;
+  }
+}
+/* Hero à vista: o rail fixo ficava por cima dos CTAs/texto (a hero em mb-mode
+   é alta: texto + palco). Some com fade enquanto a #showreel estiver visível
+   (classe .in-hero via IntersectionObserver no componente), volta nas demais
+   seções. */
+.icons-section .social-icons,
+.icons-section .resume-button {
+  transition: opacity 0.4s ease;
+}
+.icons-section.in-hero .social-icons,
+.icons-section.in-hero .resume-button {
+  opacity: 0;
+  pointer-events: none;
+}
+@media only screen and (min-width: 768px) {
+  .resume-button {
+    transform: none;
+    font-size: 20px;
+    line-height: 20px;
+  }
+  .resume-button span {
+    font-size: 23px;
+    margin-top: -1.5px;
+  }
+}
